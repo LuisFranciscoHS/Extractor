@@ -19,21 +19,79 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<!-- Developers -->
+	<developers>
+		<developer>
+			<name>Luis Francisco Hernández Sánchez</name>
+			<id>francisco</id>
+			<email>luis.sanchez AT uib.no</email>
+			<organization>University of Bergen, Norway</organization>
+		</developer>
+		<developer>
+			<name>Marc Vaudel</name>
+			<id>marc</id>
+			<email>marc.vaudel AT uib.no</email>
+			<organization>University of Bergen, Norway</organization>
+		</developer>
+	</developers>
+
 	<dependencies>
-		
+
 		<!-- The neo4j driver -->
-        <dependency>
-            <groupId>org.neo4j.driver</groupId>
-            <artifactId>neo4j-java-driver</artifactId>
-            <version>1.2.3</version>
-        </dependency>
-        
-        <!-- Guava: Google Core Libraries for Java -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>24.0-jre</version>
-        </dependency>
-        
+		<dependency>
+			<groupId>org.neo4j.driver</groupId>
+			<artifactId>neo4j-java-driver</artifactId>
+			<version>1.2.3</version>
+		</dependency>
+
+		<!-- Guava: Google Core Libraries for Java -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>24.0-jre</version>
+		</dependency>
+
+		<!-- Apache Commons IO -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency>
+
+		<!-- Compomics -->
+		<dependency>
+			<groupId>com.compomics</groupId>
+			<artifactId>utilities</artifactId>
+			<version>4.11.19</version>
+		</dependency>
+
 	</dependencies>
+
+	<repositories>
+
+		<!-- Compomics Genesis Maven 2 repository -->
+		<repository>
+			<id>genesis-maven2-repository</id>
+			<name>Genesis maven2 repository</name>
+			<url>http://genesis.UGent.be/maven2</url>
+			<layout>default</layout>
+		</repository>
+
+		<!-- old EBI repository -->
+		<repository>
+			<id>ebi-repo</id>
+			<name>The EBI internal repository</name>
+			<url>http://www.ebi.ac.uk/~maven/m2repo</url>
+		</repository>
+
+		<!-- EBI repository -->
+		<repository>
+			<id>pst-release</id>
+			<name>EBI Nexus Repository</name>
+			<url>http://www.ebi.ac.uk/Tools/maven/repos/content/repositories/pst-release</url>
+		</repository>
+
+	</repositories>
+
 </project>

@@ -1,4 +1,4 @@
-package no.uib.pap.extractor;
+package no.uib.pap.extractor.neo4j;
 
 import java.io.BufferedReader;
 import java.io.FileOutputStream;

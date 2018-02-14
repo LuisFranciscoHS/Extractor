@@ -1,4 +1,4 @@
-package no.uib.pap.extractor;
+package no.uib.pap.extractor.neo4j;
 
 import org.neo4j.driver.v1.*;
 

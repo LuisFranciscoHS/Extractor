@@ -1,4 +1,4 @@
-package no.uib.pap.extractor;
+package no.uib.pap.extractor.neo4j;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class Extractor {
 	// identifier is the only attribute used.
 
 	private static HashMap<String, String> reactions = new HashMap<>(11500); // Reaction stId to Reaction displayName
-	private static HashSet<Pathway> pathways = new HashSet<>();
+	private static HashMap<String, Pathway> pathways = new HashMap<>(); // Pathway stId to Pathway instance
 	private static TreeMultimap<String, String> mapGenesToProteins = TreeMultimap.create(); // Use multimap because
 	private static TreeMultimap<String, String> mapEnsemblToProteins = TreeMultimap.create();
 	private static TreeMultimap<Proteoform, String> mapProteoformsToReactions = TreeMultimap.create();
@@ -59,7 +59,7 @@ public class Extractor {
 	}
 
 	/**
-	 * Get list of reactions in Reactome
+	 * Get list of reactions
 	 */
 	private static void getReactions() {
 
@@ -74,7 +74,7 @@ public class Extractor {
 	}
 
 	/**
-	 * Get list of pathways in Reactome
+	 * Get list of pathways
 	 */
 	private static void getPathways() {
 
@@ -87,7 +87,7 @@ public class Extractor {
 			pathway.setNumEntitiesTotal(record.get("numEntitiesTotal").asInt());
 			pathway.setNumReactionsTotal(record.get("numReactionsTotal").asInt());
 			pathway.setNumReactionsTotal(record.get("numProteoformsTotal").asInt());
-			pathways.add(pathway);
+			pathways.put(pathway.getStId(), pathway);
 		}
 
 		// Serialize pathways
