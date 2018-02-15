@@ -28,11 +28,13 @@ public class Extractor {
 	private static HashMap<String, Pathway> pathways = new HashMap<>(); // Pathway stId to Pathway instance
 	private static TreeMultimap<String, String> mapGenesToProteins = TreeMultimap.create(); // Use multimap because
 	private static TreeMultimap<String, String> mapEnsemblToProteins = TreeMultimap.create();
-	private static TreeMultimap<Proteoform, String> mapProteoformsToReactions = TreeMultimap.create();
 	private static TreeMultimap<String, String> mapPhysicalEntitiesToReactions = TreeMultimap.create();
 	private static TreeMultimap<String, String> mapProteinsToReactions = TreeMultimap.create();
 	private static TreeMultimap<String, String> mapReactionsToPathways = TreeMultimap.create();
 	private static TreeMultimap<String, String> mapPathwaysToTopLevelPathways = TreeMultimap.create();
+	private static TreeMultimap<String, Proteoform> mapProteinsToProteoforms = TreeMultimap.create();
+	private static TreeMultimap<Proteoform, String> mapProteoformsToReactions = TreeMultimap.create();
+	// TODO Change these structures immutable structures. 
 
 	public static void main(String[] args) {
 
@@ -131,9 +133,9 @@ public class Extractor {
 
 		resultList = ConnectionNeo4j.query(ReactomeQueries.GET_MAP_PROTEOFORMS_TO_PHYSICALENTITIES);
 		for (Record record : resultList) {
-			
+						
 			String isoform = record.get("isoform").asString();
-			LinkedListMultimap<String, Long> ptms = LinkedListMultimap.create();
+			TreeMultimap<String, Long> ptms = TreeMultimap.create();
 
 			for(Object ptm : record.get("ptms").asList()) {
 				String[] parts = ptm.toString().split(":");
@@ -149,8 +151,11 @@ public class Extractor {
 					mapProteoformsToReactions.put(proteoform, reaction);
 				}
 			}
+			
+			mapProteinsToProteoforms.put(record.get("protein").asString(), proteoform);
 		}
 
+		storeSerialized(mapProteinsToProteoforms, "mapProteinsToProteoforms.gz");
 		storeSerialized(mapProteoformsToReactions, "mapProteoformsToReactions.gz");
 	}
 
