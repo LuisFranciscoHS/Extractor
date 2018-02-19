@@ -39,12 +39,12 @@ import no.uib.pap.model.Snp;
 public class Extractor {
 
 	// Separate sets of objects are created to have more than one attribute of the
-	// objects like, reactions or pathways
+	// objects like, iReactions or iPathways
 	// Other objects like genes, proteins don't need a separate list, because the
 	// identifier is the only attribute used.
 
-	private static ImmutableMap<String, String> reactions; // Reaction stId to Reaction displayName
-	private static ImmutableMap<String, Pathway> pathways; // Pathway stId to Pathway instance
+	private static ImmutableMap<String, String> iReactions; // Reaction stId to Reaction displayName
+	private static ImmutableMap<String, Pathway> iPathways; // Pathway stId to Pathway instance
 	private static ImmutableSetMultimap<String, String> imapGenesToProteins = null;
 	private static ImmutableSetMultimap<String, String> imapEnsemblToProteins = null;
 	private static ImmutableSetMultimap<String, String> imapPhysicalEntitiesToReactions = null;
@@ -66,7 +66,7 @@ public class Extractor {
 		ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
 
 		getMapProteinsToReactions();
-		System.out.println("Finished map proteins to reactions.");
+		System.out.println("Finished map proteins to iReactions.");
 
 		getMapsSnpsToProteins();
 		System.out.println("Finished maps snps to proteins.");
@@ -78,13 +78,13 @@ public class Extractor {
 		System.out.println("Finished map ensembl to proteins.");
 
 		getMapProteoformsToReactions();
-		System.out.println("Finished map proteoforms to reactions.");
+		System.out.println("Finished map proteoforms to iReactions.");
 
 		getMapReactonsToPathways();
-		System.out.println("Finished map reactions to pathways.");
+		System.out.println("Finished map iReactions to iPathways.");
 
 		getMapPathwaysToTopLevelPathways();
-		System.out.println("Finished map pathways to top level pathways.");
+		System.out.println("Finished map iPathways to top level iPathways.");
 	}
 
 	private static void getMapsSnpsToProteins() {
@@ -135,7 +135,7 @@ public class Extractor {
 	}
 
 	/**
-	 * Get list of reactions
+	 * Get list of iReactions
 	 */
 	private static void getReactions() {
 
@@ -147,14 +147,14 @@ public class Extractor {
 			builderReactions.put(record.get("stId").asString(), record.get("displayName").asString());
 		}
 
-		reactions = builderReactions.build();
+		iReactions = builderReactions.build();
 
-		// Serialize list of reactions
-		storeSerialized(reactions, "reactions.gz");
+		// Serialize list of iReactions
+		storeSerialized(iReactions, "iReactions.gz");
 	}
 
 	/**
-	 * Get list of pathways
+	 * Get list of iPathways
 	 */
 	private static void getPathways() {
 
@@ -172,10 +172,10 @@ public class Extractor {
 			builderPathways.put(pathway.getStId(), pathway);
 		}
 
-		pathways = builderPathways.build();
+		iPathways = builderPathways.build();
 
-		// Serialize pathways
-		storeSerialized(pathways, "pathways.gz");
+		// Serialize iPathways
+		storeSerialized(iPathways, "iPathways.gz");
 	}
 
 	private static void getMapGenesToProteins() {
@@ -207,7 +207,7 @@ public class Extractor {
 	}
 
 	private static void getMapProteoformsToReactions() {
-		if (reactions == null) {
+		if (iReactions == null) {
 			getReactions();
 		}
 
@@ -260,11 +260,11 @@ public class Extractor {
 	}
 
 	/**
-	 * Get mapping from proteins to reactions
+	 * Get mapping from proteins to iReactions
 	 */
 	private static void getMapProteinsToReactions() {
 
-		if (reactions == null) {
+		if (iReactions == null) {
 			getReactions();
 		}
 
@@ -283,14 +283,14 @@ public class Extractor {
 	}
 
 	/**
-	 * Get mapping from reactions to pathways
+	 * Get mapping from iReactions to iPathways
 	 */
 	private static void getMapReactonsToPathways() {
 
-		if (reactions == null) {
+		if (iReactions == null) {
 			getReactions();
 		}
-		if (pathways == null) {
+		if (iPathways == null) {
 			getPathways();
 		}
 
@@ -308,11 +308,11 @@ public class Extractor {
 	}
 
 	/**
-	 * Get mapping from pathways to top level pathways
+	 * Get mapping from iPathways to top level iPathways
 	 */
 	private static void getMapPathwaysToTopLevelPathways() {
 
-		if (pathways.size() == 0) {
+		if (iPathways.size() == 0) {
 			getPathways();
 		}
 

@@ -34,4 +34,24 @@ public interface ReactomeQueries {
 
 	public static final String GET_MAP_PROTEOFORMS_TO_PHYSICALENTITIES = "MATCH (pe:PhysicalEntity{speciesName:'Homo sapiens'})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\nWITH DISTINCT pe, re\nOPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\nWITH DISTINCT pe.stId AS physicalEntity,\n                re.identifier AS protein,\n                re.variantIdentifier AS isoform,\n                tm.coordinate as coordinate, \n                mod.identifier as type ORDER BY type, coordinate\nWITH DISTINCT physicalEntity,\n\t\t\t\tprotein,\n                CASE WHEN isoform IS NOT NULL THEN isoform ELSE protein END as isoform,\n                COLLECT(type + \":\" + CASE WHEN coordinate IS NOT NULL THEN coordinate ELSE \"null\" END) AS ptms\n                RETURN protein, isoform, ptms, collect(physicalEntity) as peSet\n                ORDER BY isoform, ptms";
 
+	static final String GET_HIT_COUNT_BY_PROTEIN_PROTEOFORMS = "MATCH (p:Pathway{speciesName:\"Homo sapiens\"})-[:hasEvent*]->(rle:ReactionLikeEvent{speciesName: \"Homo sapiens\"})-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:'Homo sapiens'})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt', identifier:\"P31749\"})\n" +
+            "WITH DISTINCT  p, rle, pe, re\n" +
+            "OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\n" +
+            "WITH DISTINCT \n" +
+            "  p.stId as pathway,\n" +
+            "  rle.stId as reaction,\n" +
+            "  pe.stId as pe,\n" +
+            "  re.identifier AS protein,\n" +
+            "  re.variantIdentifier AS isoform,\n" +
+            "  tm.coordinate as coordinate, \n" +
+            "  mod.identifier as type ORDER BY type, coordinate\n" +
+            "WITH DISTINCT  pathway, reaction, \n" +
+            "  pe,\n" +
+            "  protein,\n" +
+            "  isoform,\n" +
+            "  COLLECT(CASE WHEN coordinate IS NOT NULL THEN coordinate ELSE \"null\" END + \":\" + type) AS ptms \n" +
+            " WITH DISTINCT pathway, reaction, protein, COLLECT(CASE WHEN isoform IS NOT NULL THEN isoform ELSE protein END + ptms) as proteoform\n" +
+            "  RETURN  DISTINCT   count(pathway), count(reaction), protein, proteoform\n" +
+            "  ORDER BY proteoform";
+
 }
