@@ -2,7 +2,9 @@ package no.uib.pap.extractor.neo4j;
 
 import org.neo4j.driver.v1.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ConnectionNeo4j {
 
@@ -44,6 +46,16 @@ public class ConnectionNeo4j {
     }
 
     public static List<Record> query(String query, Value parameters) {
+        ConnectionNeo4j.session = ConnectionNeo4j.driver.session();
+
+        StatementResult queryResult = ConnectionNeo4j.session.run(query, parameters);
+
+        ConnectionNeo4j.session.close();
+
+        return queryResult.list();
+    }
+
+    public static List<Record> query(String query, Map<String,Object> parameters) {
         ConnectionNeo4j.session = ConnectionNeo4j.driver.session();
 
         StatementResult queryResult = ConnectionNeo4j.session.run(query, parameters);
