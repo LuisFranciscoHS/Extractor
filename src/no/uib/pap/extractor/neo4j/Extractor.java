@@ -43,6 +43,9 @@ public class Extractor {
     private static ImmutableSetMultimap<Proteoform, String> imapProteoformsToReactions = null;
     private static ImmutableSetMultimap<String, String> imapRsIdsToProteins = null;
     private static ImmutableSetMultimap<String, String> imapChrBpToProteins = null;
+    private static ImmutableSetMultimap<String, String> imapReactionsToParticipants = null;
+    private static ImmutableSetMultimap<String, String> imapProteinsToComplexes = null;
+    private static ImmutableSetMultimap<String, String> imapComplexesToParticipants = null;
 
     private static final int rsidColumnIndex = 2;
     // private static final int ensemblColumnIndex = 4;
@@ -81,6 +84,64 @@ public class Extractor {
 
         iProteins = getProteinNames();
         System.out.println("Finished getting the protein names.");
+
+        imapReactionsToParticipants = getReactionsToParticipants();
+        System.out.println("Finished getting reaction participants.");
+
+        imapProteinsToComplexes = getProteinsToComplexes();
+        System.out.println("Finished map proteins to complexes.");
+
+        imapComplexesToParticipants = getComplexesToParticipants();
+        System.out.println("Finished map of complexes to participants.");
+
+    }
+
+    public static ImmutableSetMultimap<String, String> getComplexesToParticipants() {
+        ImmutableSetMultimap.Builder<String, String> builderComplexesToParticipants = new ImmutableSetMultimap.Builder<>();
+
+        //Query the database to fill the data structure
+        List<Record> resultList = ConnectionNeo4j.query(ReactomeQueries.GET_COMPLEX_PARTICIPANTS);
+        for (Record record : resultList) {
+            builderComplexesToParticipants.put(record.get("complex").asString(), record.get("protein").asString());
+        }
+
+        imapComplexesToParticipants = builderComplexesToParticipants.build();
+
+        storeSerialized(imapComplexesToParticipants, outputPath + "imapComplexesToParticipants.gz");
+
+        return imapComplexesToParticipants;
+    }
+
+    public static ImmutableSetMultimap<String, String> getProteinsToComplexes() {
+        ImmutableSetMultimap.Builder<String, String> builderProteinsToComplexes = new ImmutableSetMultimap.Builder<>();
+
+        //Query the database to fill the data structure
+        List<Record> resultList = ConnectionNeo4j.query(ReactomeQueries.GET_COMPLEX_PARTICIPANTS);
+        for (Record record : resultList) {
+            builderProteinsToComplexes.put(record.get("protein").asString(), record.get("complex").asString());
+        }
+
+        imapProteinsToComplexes = builderProteinsToComplexes.build();
+        storeSerialized(imapProteinsToComplexes, outputPath + "imapProteinsToComplexes.gz");
+
+        return imapProteinsToComplexes;
+    }
+
+    public static ImmutableSetMultimap<String, String> getReactionsToParticipants() {
+        ImmutableSetMultimap.Builder<String, String> builderReactionsToParticipants = new ImmutableSetMultimap.Builder<>();
+
+        // Query the database and fill the data structure
+        List<Record> resultList = ConnectionNeo4j.query(ReactomeQueries.GET_REACTION_PARTICIPANTS);
+        for (Record record : resultList) {
+            builderReactionsToParticipants.put(record.get("reaction").asString(), record.get("protein").asString());
+        }
+
+        imapReactionsToParticipants = builderReactionsToParticipants.build();
+
+        // Serialize list of iReactions
+        storeSerialized(imapReactionsToParticipants, outputPath + "imapReactionsToParticipants.gz");
+
+        return imapReactionsToParticipants;
     }
 
     private static ImmutableSetMultimap<String, String> getMapsRsIdsToProteins() {
@@ -344,7 +405,10 @@ public class Extractor {
                 break;
             }
         }
-        return proteinsBuilder.build();
+
+        iProteins = proteinsBuilder.build();
+        storeSerialized(iProteins, outputPath + "iProteins.gz");
+        return iProteins;
     }
 
     /**

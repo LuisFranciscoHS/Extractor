@@ -1,6 +1,7 @@
 package no.uib.pap.extractor.neo4j;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSetMultimap;
 import no.uib.pap.model.Pathway;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.v1.Record;
@@ -47,14 +48,73 @@ class ExtractorTest {
     }
 
     @Test
-    void getProteinNamesTest(){
+    void getProteinNamesTest() {
         ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
 
-        ImmutableMap<String,String> iProteins = Extractor.getProteinNames();
+        ImmutableMap<String, String> iProteins = Extractor.getProteinNames();
 
         assertEquals("Hemoglobin subunit beta", iProteins.get("P68871"));
         assertEquals("Hemoglobin subunit alpha", iProteins.get("P69905"));
         assertEquals("Insulin", iProteins.get("P01308"));
+    }
+
+    @Test
+    void getReactionNeightbours() {
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
+
+        ImmutableSetMultimap<String, String> imapReactionsToParticipants = Extractor.getReactionsToParticipants();
+
+        assertEquals(2, imapReactionsToParticipants.get("R-HSA-74716").size());
+        assertTrue(imapReactionsToParticipants.get("R-HSA-74716").contains("P06213"));
+        assertTrue(imapReactionsToParticipants.get("R-HSA-74716").contains("P01308"));
+
+        assertEquals(1, imapReactionsToParticipants.get("R-HSA-74730").size());
+        assertTrue(imapReactionsToParticipants.get("R-HSA-74730").contains("P01308"));
+
+        assertEquals(2, imapReactionsToParticipants.get("R-HSA-74716").size());
+        assertTrue(imapReactionsToParticipants.get("R-HSA-74716").contains("P01308"));
+        assertTrue(imapReactionsToParticipants.get("R-HSA-74716").contains("P06213"));
+
+        assertEquals(2, imapReactionsToParticipants.get("R-HSA-74726").size());
+        assertTrue(imapReactionsToParticipants.get("R-HSA-74726").contains("P01308"));
+        assertTrue(imapReactionsToParticipants.get("R-HSA-74726").contains("P06213"));
+    }
+
+    @Test
+    void imapProteinsToComplexesTest() {
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
+
+        ImmutableSetMultimap<String,String> imapProteinsToComplexes = Extractor.getProteinsToComplexes();
+
+        assertEquals(32, imapProteinsToComplexes.get("Q9Y297").size());
+        assertTrue(imapProteinsToComplexes.get("Q9Y297").contains("R-HSA-174138"));
+        assertTrue(imapProteinsToComplexes.get("Q9Y297").contains("R-HSA-8952593"));
+
+        assertEquals(1, imapProteinsToComplexes.get("P00558").size());
+        assertTrue(imapProteinsToComplexes.get("P00558").contains("R-HSA-70484"));
+    }
+
+    @Test
+    void imapComplexesToParticipantsTest() {
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
+
+        ImmutableSetMultimap<String,String> imapComplexesToParticipants = Extractor.getComplexesToParticipants();
+
+        assertEquals(1, imapComplexesToParticipants.get("R-HSA-70484").size());
+        assertTrue(imapComplexesToParticipants.get("R-HSA-70484").contains("P00558"));
+
+        assertEquals(6, imapComplexesToParticipants.get("R-HSA-174138").size());
+        assertTrue(imapComplexesToParticipants.get("R-HSA-174138").contains("Q9Y297"));
+        assertTrue(imapComplexesToParticipants.get("R-HSA-174138").contains("P63208"));
+        assertTrue(imapComplexesToParticipants.get("R-HSA-174138").contains("Q9UKT4"));
+    }
+
+    @Test
+    void getComplexNeighbours() {
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
+
+
+
     }
 
 

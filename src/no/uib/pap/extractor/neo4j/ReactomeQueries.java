@@ -83,4 +83,12 @@ public interface ReactomeQueries {
             "    re.displayName as displayName, \n" +
             "    re.description as description";
 
+    static final String GET_REACTION_PARTICIPANTS = "MATCH p = (rle:ReactionLikeEvent{speciesName:'Homo sapiens'})-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\n" +
+            "WITH *, relationships(p) as role\n" +
+            "WITH DISTINCT rle.stId as reaction, re.identifier as protein, head(extract(x IN role | type(x))) as role ORDER BY role\n" +
+            "RETURN DISTINCT reaction, protein";
+
+    static final String GET_COMPLEX_PARTICIPANTS = "MATCH p = (c:Complex{speciesName:'Homo sapiens'})-[:hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\n" +
+            "RETURN DISTINCT c.stId as complex, re.identifier as protein";
+
 }
