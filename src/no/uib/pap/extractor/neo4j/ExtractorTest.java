@@ -67,7 +67,19 @@ class ExtractorTest {
     }
 
     @Test
-    void getReactionNeightbours() {
+    void getReactionsNeighboursTest1(){
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
+        ImmutableSetMultimap<String,String> imapReactionsToParticipants = Extractor.getReactionsToParticipants();
+
+        assertEquals(4, imapReactionsToParticipants.get("R-HSA-2230938").size());
+        assertTrue(imapReactionsToParticipants.get("R-HSA-2230938").contains("P00738"));
+        assertTrue(imapReactionsToParticipants.get("R-HSA-2230938").contains("P69905"));
+        assertTrue(imapReactionsToParticipants.get("R-HSA-2230938").contains("Q86VB7"));
+        assertTrue(imapReactionsToParticipants.get("R-HSA-2230938").contains("P68871"));
+    }
+
+    @Test
+    void getReactionNeightboursTest2() {
         ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
 
         ImmutableSetMultimap<String, String> imapReactionsToParticipants = Extractor.getReactionsToParticipants();
@@ -116,6 +128,8 @@ class ExtractorTest {
         assertTrue(imapComplexesToParticipants.get("R-HSA-174138").contains("P63208"));
         assertTrue(imapComplexesToParticipants.get("R-HSA-174138").contains("Q9UKT4"));
     }
+
+
 
     @Test
     void getConnectionsMap() {
