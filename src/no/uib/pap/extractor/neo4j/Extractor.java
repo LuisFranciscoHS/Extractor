@@ -290,7 +290,7 @@ public class Extractor {
         return imapGenesToProteins;
     }
 
-    private static ImmutableSetMultimap<String, String> getMapEnsemblToProteins() {
+    public static ImmutableSetMultimap<String, String> getMapEnsemblToProteins() {
 
         // Query the database and fill the data structure
         ImmutableSetMultimap.Builder<String, String> builderEnsemblToProteins = ImmutableSetMultimap

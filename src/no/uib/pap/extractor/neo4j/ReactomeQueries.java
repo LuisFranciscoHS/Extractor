@@ -54,12 +54,7 @@ public interface ReactomeQueries {
             "  RETURN  DISTINCT   count(pathway), count(reaction), protein, proteoform\n" +
             "  ORDER BY proteoform";
 
-    static final String GET_MAPPING_BY_PROTEIN_LIST = "MATCH (p:Pathway{speciesName:\"Homo sapiens\"})-[:hasEvent*]->(rle:ReactionLikeEvent{speciesName:\"Homo sapiens\"}),\n" +
-            "      (rle)-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"}),\n" +
-            "      (pe)-[:referenceEntity]->(re:ReferenceEntity{databaseName:\"UniProt\"})\n" +
-            "      WHERE re.identifier IN [\"P01308\"]\n" +
-            "RETURN DISTINCT re.identifier, rle.stId, rle.displayName, p.stId, p.displayName\n" +
-            "ORDER BY rle.stId";
+    static final String GET_MAPPING_BY_PROTEIN_LIST = "MATCH (p:Pathway{speciesName:\"Homo sapiens\"})-[:hasEvent*]->(rle:ReactionLikeEvent{speciesName:\"Homo sapiens\"}),\n      (rle)-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"}),\n      (pe)-[:referenceEntity]->(re:ReferenceEntity{databaseName:\"UniProt\"})\n      WHERE re.identifier IN [\"P01308\"]\nRETURN DISTINCT re.identifier, rle.stId, rle.displayName, p.stId, p.displayName\nORDER BY rle.stId";
 
     static final String GET_PROTEOFORMS_BY_PATHWAY = "MATCH (pathway:Pathway{speciesName:\"Homo sapiens\"})-[:hasEvent*]->(rle:ReactionLikeEvent{speciesName:\"Homo sapiens\"}),\n" +
             "      (rle)-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\n" +

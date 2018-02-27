@@ -2,11 +2,7 @@ package no.uib.pap.extractor.neo4j;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSetMultimap;
-import no.uib.pap.model.Pathway;
 import org.junit.jupiter.api.Test;
-import org.neo4j.driver.v1.Record;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,6 +41,18 @@ class ExtractorTest {
 //         + iReactions.get(reaction));
 //         }
 //         }
+    }
+
+    @Test
+    void getEnsembleToProteinsTest(){
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
+        ImmutableSetMultimap<String,String> imapEnsembleToProteins = Extractor.getMapEnsemblToProteins();
+
+        assertEquals(1, imapEnsembleToProteins.get("ENSP00000380389").size());
+        assertTrue(imapEnsembleToProteins.get("ENSP00000380389").contains("P19438"));
+
+        assertEquals(1, imapEnsembleToProteins.get("ENSG00000143226").size());
+        assertTrue(imapEnsembleToProteins.get("ENSG00000143226").contains("P12318"));
     }
 
     @Test
@@ -108,15 +116,6 @@ class ExtractorTest {
         assertTrue(imapComplexesToParticipants.get("R-HSA-174138").contains("P63208"));
         assertTrue(imapComplexesToParticipants.get("R-HSA-174138").contains("Q9UKT4"));
     }
-
-    @Test
-    void getComplexNeighbours() {
-        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
-
-
-
-    }
-
 
     @Test
     void getConnectionsMap() {
