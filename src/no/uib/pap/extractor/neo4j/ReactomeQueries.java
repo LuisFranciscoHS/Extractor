@@ -76,8 +76,19 @@ public interface ReactomeQueries {
             "    re.displayName as displayName, \n" +
             "    re.description as description";
 
-    static final String GET_REACTION_PARTICIPANTS = "MATCH p = (rle:ReactionLikeEvent{speciesName:'Homo sapiens'})-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\nWITH *, relationships(p) as role\nWITH DISTINCT rle.stId as reaction, re.identifier as protein, head(extract(x IN role | type(x))) as role ORDER BY role\nRETURN DISTINCT reaction, protein";
+    static final String GET_REACTION_PARTICIPANTS = "MATCH p = (rle:ReactionLikeEvent{speciesName:'Homo sapiens'})-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\n" +
+            "WITH *, relationships(p) as role\n" +
+            "WITH DISTINCT rle.stId as reaction, re.identifier as protein, head(extract(x IN role | type(x))) as role ORDER BY role\n" +
+            "RETURN DISTINCT reaction, protein, role";
 
-    static final String GET_COMPLEX_PARTICIPANTS = "MATCH p = (c:Complex{speciesName:'Homo sapiens'})-[:hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\nRETURN DISTINCT c.stId as complex, re.identifier as protein";
+    // The members of a complex are only allocated in the hasComponent slot, but for the cases when members are sets, then also they are broken down with hasMember and hasCandidate relations
+    static final String GET_COMPLEX_COMPONENTS = "MATCH p = (c:Complex{speciesName:'Homo sapiens'})-[:hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\nRETURN DISTINCT c.stId as complex, re.identifier as protein";
 
+    // The components of a set are only allocated in the hasMember and hasCandidate slots, but for the cases when components or candidates are complexes, then also they are broken down with hasMember relation
+    static final String GET_SET_MEMBERS_AND_CANDIDATES = "MATCH p = (s:EntitySet{speciesName:'Homo sapiens'})-[:hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\n" +
+            "RETURN DISTINCT s.stId as set, re.identifier as protein";
+
+    static final String GET_MODIFICATIONS_= "MATCH (re:ReferenceEntity{databaseName:'UniProt'})<-[:referenceEntity]-(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\n" +
+            "RETURN DISTINCT mod.identifier as mod, mod.displayName as name, count(re) as count\n" +
+            "ORDER BY count DESC";
 }
