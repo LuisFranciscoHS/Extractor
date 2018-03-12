@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.uib.tools;
+package no.uib.pap.extractor.PSIMOD;
+
+import org.apache.commons.cli.*;
+import org.neo4j.driver.v1.AuthTokens;
+import org.neo4j.driver.v1.GraphDatabase;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-import no.uib.db.ConnectionNeo4j;
-import no.uib.db.ReactomeAccess;
-import no.uib.pathwayquery.Conf;
-import no.uib.pathwayquery.Conf.StrVars;
-import org.apache.commons.cli.*;
-import org.neo4j.driver.v1.AuthTokens;
-import org.neo4j.driver.v1.GraphDatabase;
 
 /**
  *
@@ -76,28 +73,28 @@ public class MODGet {
 
 //        System.out.println("modId: " + cmd.getOptionValue("mod"));
 //        System.out.println("output: " + cmd.getOptionValue("output"));
-        Conf.setEmptyMaps();
-        Conf.setDefaultNeo4jValues();
-        if (cmd.hasOption("confPath")) {
-            Conf.readConf();
-        }
-        if (cmd.hasOption("host")) {
-            Conf.setValue("host", cmd.getOptionValue("host"));
-        }
-        if (cmd.hasOption("username")) {
-            Conf.setValue("username", cmd.getOptionValue("username"));
-        }
-        if (cmd.hasOption("password")) {
-            Conf.setValue("password", cmd.getOptionValue("password"));
-        }
-
-        ConnectionNeo4j.driver = GraphDatabase.driver(
-                Conf.strMap.get(StrVars.host),
-                AuthTokens.basic(Conf.strMap.get(
-                        StrVars.username),
-                        Conf.strMap.get(StrVars.password)
-                )
-        );
+//        Conf.setEmptyMaps();
+//        Conf.setDefaultNeo4jValues();
+//        if (cmd.hasOption("confPath")) {
+//            Conf.readConf();
+//        }
+//        if (cmd.hasOption("host")) {
+//            Conf.setValue("host", cmd.getOptionValue("host"));
+//        }
+//        if (cmd.hasOption("username")) {
+//            Conf.setValue("username", cmd.getOptionValue("username"));
+//        }
+//        if (cmd.hasOption("password")) {
+//            Conf.setValue("password", cmd.getOptionValue("password"));
+//        }
+//
+//        ConnectionNeo4j.driver = GraphDatabase.driver(
+//                Conf.strMap.get(StrVars.host),
+//                AuthTokens.basic(Conf.strMap.get(
+//                        StrVars.username),
+//                        Conf.strMap.get(StrVars.password)
+//                )
+//        );
 
         try {
             FileWriter resultFW = new FileWriter(cmd.getOptionValue("output"));
@@ -112,12 +109,12 @@ public class MODGet {
 //            }
 
             // Get list of proteins from Reactome
-            List<String> proteinList = ReactomeAccess.getProteinListByMods(modList);
+//            List<String> proteinList = ReactomeAccess.getProteinListByMods(modList);
 
-            // Write list to file
-            for (String protein : proteinList) {
-                resultFW.write(protein + "\n");
-            }
+//            // Write list to file
+//            for (String protein : proteinList) {
+//                resultFW.write(protein + "\n");
+//            }
 
             resultFW.close();
         } catch (IOException ex) {

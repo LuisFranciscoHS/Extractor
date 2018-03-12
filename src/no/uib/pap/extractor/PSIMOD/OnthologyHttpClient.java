@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.uib.tools;
+package no.uib.pap.extractor.PSIMOD;
 
 import java.io.BufferedReader;
 import java.io.FileWriter;
@@ -74,6 +74,13 @@ public class OnthologyHttpClient {
         }
 
     }
+
+    /*
+    * try {
+            result = "http://www.ebi.ac.uk/ols/api/ontologies/" + onthologyName + "/terms/" + URLEncoder.encode(URLEncoder.encode("htp://purl.obolibrary.org/obot/MOD_" + term, "ISO-8859-1"), "ISO-8859-1") + "/" + relation + "?size=" + onthologySize;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }*/
 
     private static String getOntologyDescription(String onthologyName) {
 
