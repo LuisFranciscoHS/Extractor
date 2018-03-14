@@ -10,85 +10,53 @@ import java.util.List;
 
 public class Generic {
 
+    static String outputPath = "";
+
     /**
-     * Converts one file to the correct file format for PathwayMatcher
+     * Converts one file to the correct file format for PathwayMatcher.
+     *
+     * <p>It will add MOD:00000 as the type for each modification.</p>
+     * <p>For each proteoform, if the ptms are separated by 'or', then the matching type should be subset.
+     * If the proteoform is separateb by 'and' then superset matching type is used.</p>
      *
      * @param args [0] input path+file [1] output path
      */
     public static void main(String args[]) {
-
-//        splitFlexibleAndOne(args);
-
         convertToSimpleFormat(args);
     }
 
     private static void convertToSimpleFormat(String[] args) {
-        FileWriter outputFlexible = null;
+        FileWriter outputSuperset = null;
+        FileWriter outputSubset = null;
         if (args.length <= 0) {
             System.out.println("Need to specify the input file as argument.");
             System.exit(1);
         }
+        if(args.length >= 2){
+            outputPath = args[1];
+        }
         try {
             List<String> lines = Files.readLines(new File(args[0]), Charset.defaultCharset());
-            outputFlexible = new FileWriter(args[1] + "toMatchFlexible.tsv");
+            outputSuperset = new FileWriter(outputPath + "toMatchAsSuperset.tsv");
+            outputSubset = new FileWriter(outputPath + "toMatchAsSubset.tsv");
 
             int R = 0;
             for (String line : lines) {
-                if (R == 0) {
+                if (R == 0) {   // Skip the header line
                     R++;
                     continue;
                 }
                 if(line.contains("or")){
-                    String[] parts = line.split("\t");
-                    for(int I = 1; I < parts.length; I++){
-                        outputFlexible.write(line.replace("\t", ";00000:").replace(" or ", ",00000:") + "\n");
-                    }
+                    outputSuperset.write(line.replace("\t", ";00000:").replace(" or ", ",00000:") + "\n");
                 } else{
-                    outputFlexible.write(line.replace("\t", ";00000:").replace(" and ", ",00000:") + "\n");
+                    outputSubset.write(line.replace("\t", ";00000:").replace(" and ", ",00000:") + "\n");
                 }
             }
-            outputFlexible.close();
-            //outputOne.close();
+            outputSuperset.close();
+            outputSubset.close();
         } catch (IOException e) {
             System.out.println("Could not read file: " + args[0]);
             System.exit(2);
         }
     }
-
-    public static void splitFlexibleAndOne(String args[]) {
-
-        FileWriter outputFlexible = null;
-        FileWriter outputOne = null;
-
-        if (args.length <= 0) {
-            System.out.println("Need to specify the input file as argument.");
-            System.exit(1);
-        }
-        try {
-            List<String> lines = Files.readLines(new File(args[0]), Charset.defaultCharset());
-            outputFlexible = new FileWriter(args[1] + "toMatchFlexible.tsv");
-            outputOne = new FileWriter(args[1] + "toMatchOne.tsv");
-
-            int R = 0;
-            for (String line : lines) {
-                if (R == 0) {
-                    R++;
-                    continue;
-                }
-                if(line.contains("or")){
-                    outputOne.write(line.replace("\t", ";00000:").replace(" or ", ",00000:") + "\n");
-                } else{
-                    outputFlexible.write(line.replace("\t", ";00000:").replace(" and ", ",00000:") + "\n");
-                }
-
-
-            }
-            outputFlexible.close();
-            outputOne.close();
-        } catch (IOException e) {
-            System.out.println("Could not read file: " + args[0]);
-            System.exit(2);
-        }
-    }
-
 }
