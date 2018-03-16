@@ -160,7 +160,112 @@ class ExtractorTest {
         assertTrue(imapSetsToMembersAndCandidates.get("R-HSA-114528").contains("P05129"));
     }
 
+    @Test
+    void imapRsidsToProteinsTest(){
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
 
+        ImmutableSetMultimap<String,String> imapRsidsToProteins = Extractor.getRsIdsToProteins(11);
+
+        assertTrue(imapRsidsToProteins.containsKey("rs10840447"));
+        assertTrue(imapRsidsToProteins.containsKey("rs7110099"));
+        assertTrue(imapRsidsToProteins.containsKey("rs555583938"));
+        assertTrue(imapRsidsToProteins.get("rs10840447").contains("P01308"));
+        assertTrue(imapRsidsToProteins.get("rs7110099").contains("P01308"));
+        assertTrue(imapRsidsToProteins.get("rs555583938").contains("P01308"));
+    }
+
+    @Test
+    void imapChrBpToProteinsTest(){
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
+
+        ImmutableSetMultimap<Long,String> imapChrBpToProteins = Extractor.getChrBpToProteins(11);
+
+        assertTrue(imapChrBpToProteins.containsKey(2176042L));
+        assertTrue(imapChrBpToProteins.containsKey(2176105L));
+        assertTrue(imapChrBpToProteins.containsKey(2176134L));
+        assertTrue(imapChrBpToProteins.get(2176042L).contains("P01308"));
+        assertTrue(imapChrBpToProteins.get(2176105L).contains("P01308"));
+        assertTrue(imapChrBpToProteins.get(2176134L).contains("P01308"));
+    }
+
+    @Test
+    void imapGeneticVariantsToProteinsTest5(){
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
+
+        ImmutableSetMultimap<String,String> imapRsidsToProteins = Extractor.getRsIdsToProteins(5);
+
+        assertTrue(imapRsidsToProteins.containsKey("rs17238540"));
+        assertTrue(imapRsidsToProteins.get("rs17238540").contains("P04035"));
+
+        ImmutableSetMultimap<Long,String> imapChrBpToProteins = Extractor.getChrBpToProteins(5);
+
+        assertTrue(imapChrBpToProteins.containsKey(74655498L));
+        assertTrue(imapChrBpToProteins.get(74655498L).contains("P04035"));
+    }
+
+    @Test
+    void imapGeneticVariantsToProteinsTest19(){
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
+
+        ImmutableSetMultimap<String,String> imapRsidsToProteins = Extractor.getRsIdsToProteins(19);
+
+        assertTrue(imapRsidsToProteins.containsKey("rs12979860"));
+        assertTrue(imapRsidsToProteins.containsKey("rs12980275"));
+        assertTrue(imapRsidsToProteins.get("rs12979860").contains("Q8IZI9"));
+        assertTrue(imapRsidsToProteins.get("rs12979860").contains("Q8IZI9"));
+
+        ImmutableSetMultimap<Long,String> imapChrBpToProteins = Extractor.getChrBpToProteins(19);
+
+        assertTrue(imapChrBpToProteins.containsKey(39729266L));
+        assertTrue(imapChrBpToProteins.containsKey(39729326L));
+        assertTrue(imapChrBpToProteins.get(39729266L).contains("Q8IZI9"));
+        assertTrue(imapChrBpToProteins.get(39729326L).contains("Q8IZI9"));
+    }
+
+    @Test
+    void imapGeneticVariantsToProteinsTest1(){
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
+
+        ImmutableSetMultimap<String,String> imapRsidsToProteins = Extractor.getRsIdsToProteins(1);
+
+        assertTrue(imapRsidsToProteins.containsKey("rs2816958"));
+        assertTrue(imapRsidsToProteins.get("rs2816958").contains("O00482"));
+
+        ImmutableSetMultimap<Long,String> imapChrBpToProteins = Extractor.getChrBpToProteins(1);
+
+        assertTrue(imapChrBpToProteins.containsKey(200101920L));
+        assertTrue(imapChrBpToProteins.get(200101920L).contains("O00482"));
+    }
+
+    @Test
+    void imapGeneticVariantsToProteinsTest22(){
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
+
+        ImmutableSetMultimap<String,String> imapRsidsToProteins = Extractor.getRsIdsToProteins(22);
+
+        assertTrue(imapRsidsToProteins.containsKey("rs35873774"));
+        assertTrue(imapRsidsToProteins.get("rs35873774").contains("P17861"));
+
+        ImmutableSetMultimap<Long,String> imapChrBpToProteins = Extractor.getChrBpToProteins(22);
+
+        assertTrue(imapChrBpToProteins.containsKey(29191932L));
+        assertTrue(imapChrBpToProteins.get(29191932L).contains("P17861"));
+    }
+
+    @Test
+    void imapGeneticVariantsToProteinsTest20(){
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
+
+        ImmutableSetMultimap<String,String> imapRsidsToProteins = Extractor.getRsIdsToProteins(20);
+
+        assertTrue(imapRsidsToProteins.containsKey("rs1883832"));
+        assertTrue(imapRsidsToProteins.get("rs1883832").contains("P25942"));
+
+        ImmutableSetMultimap<Long,String> imapChrBpToProteins = Extractor.getChrBpToProteins(20);
+
+        assertTrue(imapChrBpToProteins.containsKey(44746982L));
+        assertTrue(imapChrBpToProteins.get(44746982L).contains("P25942"));
+    }
 
     @Test
     void getConnectionsMap() {

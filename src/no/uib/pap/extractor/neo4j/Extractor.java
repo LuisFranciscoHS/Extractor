@@ -36,11 +36,12 @@ public class Extractor {
     private static ImmutableSetMultimap<String, String> imapPathwaysToTopLevelPathways = null;
     private static ImmutableSetMultimap<String, Proteoform> imapProteinsToProteoforms = null;
     private static ImmutableSetMultimap<Proteoform, String> imapProteoformsToReactions = null;
-    private static ImmutableSetMultimap<String, String> imapRsIdsToProteins = null;
-    private static ImmutableSetMultimap<String, String> imapChrBpToProteins = null;
     private static ImmutableSetMultimap<String, String> imapProteinsToComplexes = null;
     private static ImmutableSetMultimap<String, String> imapComplexesToComponents = null;
     private static ImmutableSetMultimap<String, String> imapSetsToMembersAndCandidates = null;
+
+    private static ImmutableSetMultimap<String, String> imapRsIdsToProteins = null; // An array of multimaps, one for each chromosome. Added one extra to use natural 1-based numbering.
+    private static ImmutableSetMultimap<Long, String> imapChrBpToProteins = null;
 
     private static final int rsidColumnIndex = 2;
     // private static final int ensemblColumnIndex = 4;
@@ -53,14 +54,18 @@ public class Extractor {
 
         ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
 
-        imapProteinsToReactions = getMapProteinsToReactions();
-        System.out.println("Finished map proteins to iReactions.");
+//        imapProteinsToReactions = getMapProteinsToReactions();
+//        System.out.println("Finished map proteins to iReactions.");
 
-//        imapRsIdsToProteins = getMapsRsIdsToProteins();
-//        System.out.println("Finished map rsids to proteins.");
-//
-//        imapChrBpToProteins = getMapsChrBpToProteins();
-//        System.out.println("Finished map chrBp to proteins.");
+//        for (int chr = 1; chr <= 22; chr++) {
+//            imapRsIdsToProteins = getRsIdsToProteins(chr);
+//            System.out.println("Finished map rsids to proteins, chromosome " + chr);
+//        }
+
+        for (int chr = 1; chr <= 22; chr++) {
+            imapChrBpToProteins = getChrBpToProteins(chr);
+            System.out.println("Finished map chrBp to proteins, chromosome " + chr);
+        }
 //
 //        imapGenesToProteins = getMapGenesToProteins();
 //        System.out.println("Finished map genes to proteins.");
@@ -82,12 +87,12 @@ public class Extractor {
 //
 //        imapProteinsToComplexes = getProteinsToComplexes();
 //        System.out.println("Finished map proteins to complexes.");
-
-        imapComplexesToComponents = getComplexesToComponents();
-        System.out.println("Finished map of complexes to participants.");
-
-        imapSetsToMembersAndCandidates = getSetsToMembersAndCandidates();
-        System.out.println("Finished map of sets to members and candidates.");
+//
+//        imapComplexesToComponents = getComplexesToComponents();
+//        System.out.println("Finished map of complexes to participants.");
+//
+//        imapSetsToMembersAndCandidates = getSetsToMembersAndCandidates();
+//        System.out.println("Finished map of sets to members and candidates.");
 
     }
 
@@ -138,88 +143,85 @@ public class Extractor {
         return imapProteinsToComplexes;
     }
 
-    private static ImmutableSetMultimap<String, String> getMapsRsIdsToProteins() {
+    public static ImmutableSetMultimap<String, String> getRsIdsToProteins(int chr) {
 
         if (imapProteinsToReactions == null) {
             getMapProteinsToReactions();
         }
 
-        ImmutableSetMultimap.Builder<String, String> builderRsIdsToProteins = ImmutableSetMultimap
-                .<String, String>builder();
+        ImmutableSetMultimap.Builder<String, String> builderRsIdsToProteins = ImmutableSetMultimap.<String, String>builder();
 
         // Traverse all the vepTables
-        for (int chr = 1; chr <= 22; chr++) {
-            System.out.println("Scanning vepTable for chromosome " + chr);
-            try {
-                BufferedReader br = getBufferedReaderFromResource(chr + ".gz");
-                br.readLine(); // Read header line
 
-                for (String line; (line = br.readLine()) != null; ) {
+        System.out.println("Scanning vepTable for chromosome " + chr);
+        try {
+            BufferedReader br = getBufferedReaderFromResource(chr + ".gz");
+            br.readLine(); // Read header line
 
-                    Multimap<Snp, String> snpToSwissprotMap = getSNPAndSwissProtFromVep(line);
+            for (String line; (line = br.readLine()) != null; ) {
 
-                    for (Map.Entry<Snp, String> snpToSwissprotPair : snpToSwissprotMap.entries()) {
-                        Snp snp = snpToSwissprotPair.getKey();
-                        String protein = snpToSwissprotPair.getValue();
+                Multimap<Snp, String> snpToSwissprotMap = getSNPAndSwissProtFromVep(line);
 
-                        if (!protein.equals("NA")) {
-                            if (imapProteinsToReactions.containsKey(protein)) {
-                                builderRsIdsToProteins.put(snp.getRsid(), protein);
-                            }
+                for (Map.Entry<Snp, String> snpToSwissprotPair : snpToSwissprotMap.entries()) {
+                    Snp snp = snpToSwissprotPair.getKey();
+                    String protein = snpToSwissprotPair.getValue();
+
+                    if (!protein.equals("NA")) {
+                        if (imapProteinsToReactions.containsKey(protein)) {
+                            builderRsIdsToProteins.put(snp.getRsid(), protein);
                         }
                     }
                 }
-            } catch (IOException ex) {
-                sendError(ERROR_READING_VEP_TABLES, chr);
             }
+        } catch (IOException ex) {
+            sendError(ERROR_READING_VEP_TABLES, chr);
         }
+
 
         imapRsIdsToProteins = builderRsIdsToProteins.build();
 
-        storeSerialized(imapRsIdsToProteins, outputPath + "imapRsIdsToProteins.gz");
+        storeSerialized(imapRsIdsToProteins, outputPath + "imapRsIdsToProteins" + chr + ".gz");
 
         return imapRsIdsToProteins;
     }
 
-    private static ImmutableSetMultimap<String, String> getMapsChrBpToProteins() {
+    public static ImmutableSetMultimap<Long, String> getChrBpToProteins(int chr) {
 
         if (imapProteinsToReactions == null) {
             getMapProteinsToReactions();
         }
 
-        ImmutableSetMultimap.Builder<String, String> builderChrBpToProteins = ImmutableSetMultimap
-                .<String, String>builder();
+        ImmutableSetMultimap.Builder<Long, String> builderChrBpToProteins = ImmutableSetMultimap.<Long, String>builder();
 
         // Traverse all the vepTables
-        for (int chr = 1; chr <= 22; chr++) {
-            System.out.println("Scanning vepTable for chromosome " + chr);
-            try {
-                BufferedReader br = getBufferedReaderFromResource(chr + ".gz");
-                br.readLine(); // Read header line
 
-                for (String line; (line = br.readLine()) != null; ) {
+        System.out.println("Scanning vepTable for chromosome " + chr);
+        try {
+            BufferedReader br = getBufferedReaderFromResource(chr + ".gz");
+            br.readLine(); // Read header line
 
-                    Multimap<Snp, String> snpToSwissprotMap = getSNPAndSwissProtFromVep(line);
+            for (String line; (line = br.readLine()) != null; ) {
 
-                    for (Map.Entry<Snp, String> snpToSwissprotPair : snpToSwissprotMap.entries()) {
-                        Snp snp = snpToSwissprotPair.getKey();
-                        String protein = snpToSwissprotPair.getValue();
+                Multimap<Snp, String> snpToSwissprotMap = getSNPAndSwissProtFromVep(line);
 
-                        if (!protein.equals("NA")) {
-                            if (imapProteinsToReactions.containsKey(protein)) {
-                                builderChrBpToProteins.put(snp.getChr() + "_" + snp.getBp(), protein);
-                            }
+                for (Map.Entry<Snp, String> snpToSwissprotPair : snpToSwissprotMap.entries()) {
+                    Snp snp = snpToSwissprotPair.getKey();
+                    String protein = snpToSwissprotPair.getValue();
+
+                    if (!protein.equals("NA")) {
+                        if (imapProteinsToReactions.containsKey(protein)) {
+                            builderChrBpToProteins.put(snp.getBp(), protein);
                         }
                     }
                 }
-            } catch (IOException ex) {
-                sendError(ERROR_READING_VEP_TABLES, chr);
             }
+        } catch (IOException ex) {
+            sendError(ERROR_READING_VEP_TABLES, chr);
         }
 
         imapChrBpToProteins = builderChrBpToProteins.build();
 
-        storeSerialized(imapChrBpToProteins, outputPath + "imapChrBpToProteins.gz");
+        storeSerialized(imapChrBpToProteins, outputPath + "imapChrBpToProteins" + chr + ".gz");
         return imapChrBpToProteins;
     }
 
@@ -243,7 +245,7 @@ public class Extractor {
         resultList = ConnectionNeo4j.query(ReactomeQueries.GET_REACTION_PARTICIPANTS);
         for (Record record : resultList) {
             String role = record.get("role").asString().toUpperCase();
-            if(!iReactions.containsKey(record.get("reaction").asString())){
+            if (!iReactions.containsKey(record.get("reaction").asString())) {
                 System.out.println("Missing reaction: " + record.get("reaction").asString());
             }
             iReactions.get(record.get("reaction").asString()).addParticipant(record.get("protein").asString(), Role.valueOf(role));
