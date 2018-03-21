@@ -61,11 +61,11 @@ public class Extractor {
 //            imapRsIdsToProteins = getRsIdsToProteins(chr);
 //            System.out.println("Finished map rsids to proteins, chromosome " + chr);
 //        }
-
-        for (int chr = 1; chr <= 22; chr++) {
-            imapChrBpToProteins = getChrBpToProteins(chr);
-            System.out.println("Finished map chrBp to proteins, chromosome " + chr);
-        }
+//
+//        for (int chr = 1; chr <= 22; chr++) {
+//            imapChrBpToProteins = getChrBpToProteins(chr);
+//            System.out.println("Finished map chrBp to proteins, chromosome " + chr);
+//        }
 //
 //        imapGenesToProteins = getMapGenesToProteins();
 //        System.out.println("Finished map genes to proteins.");
@@ -73,8 +73,8 @@ public class Extractor {
 //        imapEnsemblToProteins = getMapEnsemblToProteins();
 //        System.out.println("Finished map ensembl to proteins.");
 //
-//        imapProteoformsToReactions = getMapProteoformsToReactions();
-//        System.out.println("Finished map proteoforms to iReactions.");
+        imapProteoformsToReactions = getMapProteinstToProteoformsToReactions().getRight();
+        System.out.println("Finished map proteoforms to iReactions.");
 //
 //        imapReactionsToPathways = getMapReactonsToPathways();
 //        System.out.println("Finished map iReactions to iPathways.");
@@ -312,7 +312,13 @@ public class Extractor {
         return imapEnsemblToProteins;
     }
 
-    private static ImmutableSetMultimap<Proteoform, String> getMapProteoformsToReactions() {
+    /**
+     * Creates mapping from proteins to proteoforms and mapping from proteoforms to reactions.
+     * Note that the proteins are identified by uniprot accession without the isoform, but the proteoforms include the isoform.
+     *
+     * @return
+     */
+    public static Pair<ImmutableSetMultimap<String, Proteoform>, ImmutableSetMultimap<Proteoform, String>> getMapProteinstToProteoformsToReactions() {
         if (iReactions == null) {
             getReactions();
         }
@@ -338,6 +344,7 @@ public class Extractor {
         resultList = ConnectionNeo4j.query(ReactomeQueries.GET_MAP_PROTEOFORMS_TO_PHYSICALENTITIES);
         for (Record record : resultList) {
 
+            // Create the proteoform instance using the isoform and ptms.
             String isoform = record.get("isoform").asString();
             List<Pair<String, Long>> ptms = new ArrayList<>();
 
@@ -350,11 +357,13 @@ public class Extractor {
 
             Proteoform proteoform = new Proteoform(isoform, ptms);
 
+            // Update mapping 1
             for (Object physicalEntity : record.get("peSet").asList()) {
                 for (String reaction : imapPhysicalEntitiesToReactions.get(physicalEntity.toString())) {
                     builderProteoformsToReactions.put(proteoform, reaction);
                 }
             }
+            // Update mapping 2
             builderProteinsToProteoforms.put(record.get("protein").asString(), proteoform);
         }
 
@@ -364,7 +373,7 @@ public class Extractor {
         storeSerialized(imapProteinsToProteoforms, outputPath + "imapProteinsToProteoforms.gz");
         storeSerialized(imapProteoformsToReactions, outputPath + "imapProteoformsToReactions.gz");
 
-        return imapProteoformsToReactions;
+        return new MutablePair<>(imapProteinsToProteoforms, imapProteoformsToReactions);
     }
 
     /**

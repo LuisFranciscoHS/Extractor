@@ -54,20 +54,7 @@ public interface ReactomeQueries {
             "RETURN DISTINCT p.stId as pathway, rle.stId as reaction, (CASE WHEN isoform IS NOT NULL THEN isoform ELSE protein END + ptms) as proteoform       \n" +
             "                ORDER BY proteoform";
 
-    static final String GET_PROTEOFORMS_BY_PATHWAY = "MATCH (pathway:Pathway{speciesName:\"Homo sapiens\"})-[:hasEvent*]->(rle:ReactionLikeEvent{speciesName:\"Homo sapiens\"}),\n" +
-            "      (rle)-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\n" +
-            "      WHERE pathway.stId IN [\"R-HSA-5683057\",\"R-HSA-162582\"]\n" +
-            "WITH DISTINCT pathway, rle, pe, re\n" +
-            "OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\n" +
-            "WITH DISTINCT pathway, rle.stId as reaction, pe.stId AS physicalEntity,\n" +
-            "                re.identifier AS protein, re.variantIdentifier AS isoform,  tm.coordinate as coordinate, \n" +
-            "                mod.identifier as type \n" +
-            "ORDER BY type, coordinate\n" +
-            "WITH DISTINCT pathway, reaction, physicalEntity, protein,\n" +
-            "                CASE WHEN isoform IS NOT NULL THEN isoform ELSE protein END as isoform,\n" +
-            "                COLLECT(type + \":\" + CASE WHEN coordinate IS NOT NULL THEN coordinate ELSE \"null\" END) AS ptms\n" +
-            "RETURN pathway.stId, pathway.displayName, reaction, protein, isoform, ptms, collect(physicalEntity) as peSet\n" +
-            "ORDER BY isoform, ptms";
+    static final String GET_PROTEOFORMS_BY_PATHWAY = "MATCH (pathway:Pathway{speciesName:\"Homo sapiens\"})-[:hasEvent*]->(rle:ReactionLikeEvent{speciesName:\"Homo sapiens\"}),\n      (rle)-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\n      WHERE pathway.stId IN [\"R-HSA-5683057\",\"R-HSA-162582\"]\nWITH DISTINCT pathway, rle, pe, re\nOPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\nWITH DISTINCT pathway, rle.stId as reaction, pe.stId AS physicalEntity,\n                re.identifier AS protein, re.variantIdentifier AS isoform,  tm.coordinate as coordinate, \n                mod.identifier as type \nORDER BY type, coordinate\nWITH DISTINCT pathway, reaction, physicalEntity, protein,\n                CASE WHEN isoform IS NOT NULL THEN isoform ELSE protein END as isoform,\n                COLLECT(type + \":\" + CASE WHEN coordinate IS NOT NULL THEN coordinate ELSE \"null\" END) AS ptms\nRETURN pathway.stId, pathway.displayName, reaction, protein, isoform, ptms, collect(physicalEntity) as peSet\nORDER BY isoform, ptms";
 
     static final String GET_PROTEIN_NAMES = "MATCH (re:ReferenceEntity{databaseName:'UniProt'})<-[:referenceEntity]-(ewas:PhysicalEntity{speciesName:'Homo sapiens'})\n" +
             "WHERE re.description IS NOT NULL\n" +

@@ -2,9 +2,13 @@ package no.uib.pap.extractor.neo4j;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSetMultimap;
+import no.uib.pap.model.Proteoform;
+import no.uib.pap.model.ProteoformFormat;
 import no.uib.pap.model.Reaction;
 import no.uib.pap.model.Role;
 import org.junit.jupiter.api.Test;
+
+import java.text.ParseException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -265,6 +269,27 @@ class ExtractorTest {
 
         assertTrue(imapChrBpToProteins.containsKey(44746982L));
         assertTrue(imapChrBpToProteins.get(44746982L).contains("P25942"));
+    }
+
+    @Test
+    void imapProteinsToProteoformsTest() throws ParseException {
+        ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
+
+        ImmutableSetMultimap<String,Proteoform> imapProteinsToProteoforms = Extractor.getMapProteinstToProteoformsToReactions().getLeft();
+
+        assertTrue(imapProteinsToProteoforms.containsKey("O43561"));
+        assertTrue(imapProteinsToProteoforms.get("O43561").contains(ProteoformFormat.SIMPLE.getProteoform("O43561-2;00048:127")));
+
+        assertTrue(imapProteinsToProteoforms.containsKey("P11362"));
+        assertTrue(imapProteinsToProteoforms.get("P11362").contains(ProteoformFormat.SIMPLE.getProteoform("P11362-1;00048:463")));
+        assertTrue(imapProteinsToProteoforms.get("P11362").contains(ProteoformFormat.SIMPLE.getProteoform("P11362-19;00048:463")));
+
+        assertTrue(imapProteinsToProteoforms.containsKey("P21802"));
+        assertTrue(imapProteinsToProteoforms.get("P21802").contains(ProteoformFormat.SIMPLE.getProteoform("P21802-1;00048:466")));
+        assertTrue(imapProteinsToProteoforms.get("P21802").contains(ProteoformFormat.SIMPLE.getProteoform("P21802-18;00048:465")));
+        assertTrue(imapProteinsToProteoforms.get("P21802").contains(ProteoformFormat.SIMPLE.getProteoform("P21802-3;00048:467")));
+        assertTrue(imapProteinsToProteoforms.get("P21802").contains(ProteoformFormat.SIMPLE.getProteoform("P21802-5;00048:464")));
+
     }
 
     @Test
