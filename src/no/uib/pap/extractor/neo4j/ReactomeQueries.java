@@ -19,7 +19,7 @@ public interface ReactomeQueries {
 
     public static final String GET_COUNT_ALL_REACTIONS = "MATCH (n:ReactionLikeEvent{speciesName:\"Homo sapiens\"}) RETURN count(DISTINCT n) as count";
 
-    public static final String GET_MAP_PROTEINS_TO_REACTIONS = "MATCH (r:ReactionLikeEvent{speciesName:\"Homo sapiens\"})-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:\"UniProt\"})\nRETURN DISTINCT re.identifier as protein, r.stId AS reaction";
+    public static final String GET_MAP_PROTEINS_TO_REACTIONS = "MATCH (pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:\"UniProt\"})\nWITH pe, re\nOPTIONAL MATCH (r:ReactionLikeEvent{speciesName:\"Homo sapiens\"})-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe)\nRETURN DISTINCT re.identifier as protein, r.stId AS reaction";
 
     public static final String GET_MAP_PHYSICALENTITIES_TO_REACTIONS = "MATCH (r:ReactionLikeEvent{speciesName:\"Homo sapiens\"})-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})\nRETURN DISTINCT pe.stId as physicalEntity, r.stId AS reaction";
 
@@ -71,11 +71,28 @@ public interface ReactomeQueries {
     // The members of a complex are only allocated in the hasComponent slot, but for the cases when members are sets, then also they are broken down with hasMember and hasCandidate relations
     static final String GET_COMPLEX_COMPONENTS = "MATCH p = (c:Complex{speciesName:'Homo sapiens'})-[:hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\nRETURN DISTINCT c.stId as complex, re.identifier as protein";
 
+    static final String GET_PATH_FROM_COMPLEX_TO_PROTEIN = "MATCH p = (c:Complex{speciesName:'Homo sapiens', stId:'R-HSA-6811381'})-[:hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\nWHERE re.identifier = \"O00139\"\nRETURN c.stId as complex, extract(n IN nodes(p)| {id:n.stId, l:last(labels(n))}) AS steps, re.identifier as protein";
+
     // The components of a set are only allocated in the hasMember and hasCandidate slots, but for the cases when components or candidates are complexes, then also they are broken down with hasMember relation
     static final String GET_SET_MEMBERS_AND_CANDIDATES = "MATCH p = (s:EntitySet{speciesName:'Homo sapiens'})-[:hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\n" +
             "RETURN DISTINCT s.stId as set, re.identifier as protein";
 
-    static final String GET_MODIFICATIONS_= "MATCH (re:ReferenceEntity{databaseName:'UniProt'})<-[:referenceEntity]-(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\n" +
+    static final String GET_MODIFICATIONS_ = "MATCH (re:ReferenceEntity{databaseName:'UniProt'})<-[:referenceEntity]-(pe:PhysicalEntity{speciesName:\"Homo sapiens\"})-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\n" +
             "RETURN DISTINCT mod.identifier as mod, mod.displayName as name, count(re) as count\n" +
             "ORDER BY count DESC";
+
+    static final String GET_ALL_PROTEOFORMS = "MATCH (pe:PhysicalEntity{speciesName:'Homo sapiens'})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\n" +
+            "WITH DISTINCT pe, re\n" +
+            "OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\n" +
+            "WITH DISTINCT pe.stId AS physicalEntity,\n" +
+            "                re.identifier AS protein,\n" +
+            "                re.variantIdentifier AS isoform,\n" +
+            "                tm.coordinate as coordinate, \n" +
+            "                mod.identifier as type ORDER BY type, coordinate\n" +
+            "WITH DISTINCT physicalEntity,\n" +
+            "\t\t\t\tprotein,\n" +
+            "                CASE WHEN isoform IS NOT NULL THEN isoform ELSE protein END as isoform,\n" +
+            "                COLLECT(type + \":\" + CASE WHEN coordinate IS NOT NULL THEN coordinate ELSE \"null\" END) AS ptms\n" +
+            "                RETURN DISTINCT isoform, ptms\n" +
+            "                ORDER BY isoform, ptms";
 }

@@ -32,6 +32,10 @@ public class Generic {
             System.out.println("Need to specify the input file as argument.");
             System.exit(1);
         }
+        if(args.length <= 1){
+            System.out.println("Need to specify the outputPath.");
+            System.exit(2);
+        }
         if(args.length >= 2){
             outputPath = args[1];
         }
@@ -47,9 +51,9 @@ public class Generic {
                     continue;
                 }
                 if(line.contains("or")){
-                    outputSuperset.write(line.replace("\t", ";00000:").replace(" or ", ",00000:") + "\n");
+                    outputSubset.write(line.replace("\t", ";00000:").replace(" or ", ",00000:") + "\n");
                 } else{
-                    outputSubset.write(line.replace("\t", ";00000:").replace(" and ", ",00000:") + "\n");
+                    outputSuperset.write(line.replace("\t", ";00000:").replace(" and ", ",00000:") + "\n");
                 }
             }
             outputSuperset.close();

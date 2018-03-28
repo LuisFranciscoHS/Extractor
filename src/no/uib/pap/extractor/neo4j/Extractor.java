@@ -54,8 +54,8 @@ public class Extractor {
 
         ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
 
-//        imapProteinsToReactions = getMapProteinsToReactions();
-//        System.out.println("Finished map proteins to iReactions.");
+        imapProteinsToReactions = getMapProteinsToReactions();
+        System.out.println("Finished map proteins to iReactions.");
 
 //        for (int chr = 1; chr <= 22; chr++) {
 //            imapRsIdsToProteins = getRsIdsToProteins(chr);
@@ -73,8 +73,8 @@ public class Extractor {
 //        imapEnsemblToProteins = getMapEnsemblToProteins();
 //        System.out.println("Finished map ensembl to proteins.");
 //
-        imapProteoformsToReactions = getMapProteinstToProteoformsToReactions().getRight();
-        System.out.println("Finished map proteoforms to iReactions.");
+//        imapProteoformsToReactions = getMapProteinstToProteoformsToReactions().getRight();
+//        System.out.println("Finished map proteoforms to iReactions.");
 //
 //        imapReactionsToPathways = getMapReactonsToPathways();
 //        System.out.println("Finished map iReactions to iPathways.");
@@ -391,7 +391,11 @@ public class Extractor {
         List<Record> resultList = ConnectionNeo4j.query(ReactomeQueries.GET_MAP_PROTEINS_TO_REACTIONS);
 
         for (Record record : resultList) {
-            builderProteinsToReactions.put(record.get("protein").asString(), record.get("reaction").asString());
+            if(record.get("reaction").asString().equals("null")){
+                builderProteinsToReactions.putAll(record.get("protein").asString(), new ArrayList<String>());
+            }else{
+                builderProteinsToReactions.put(record.get("protein").asString(), record.get("reaction").asString());
+            }
         }
 
         imapProteinsToReactions = builderProteinsToReactions.build();
