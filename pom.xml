@@ -3,11 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>Extractor</groupId>
 	<artifactId>Extractor</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.7</version>
 	<name>Extractor</name>
 	<description>Retrieves the information contained in the databases and files, to create in memory data structures, and finally serializes the data structures to compressed files.</description>
 	<build>
-		<sourceDirectory>src</sourceDirectory>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -49,7 +50,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>24.0-jre</version>
+			<version>24.1-jre</version>
 		</dependency>
 
 		<!-- Apache Commons IO -->
@@ -85,6 +86,12 @@
             <version>5.0.0</version>
         </dependency>
 
+		<dependency>
+			<groupId>no.uib.pap</groupId>
+			<artifactId>Model</artifactId>
+			<version>1.7.1</version>
+		</dependency>
+
 		<!-- Apache Http client -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -92,6 +99,7 @@
 			<version>4.5.3</version>
 			<type>jar</type>
 		</dependency>
+
     </dependencies>
 
 	<repositories>

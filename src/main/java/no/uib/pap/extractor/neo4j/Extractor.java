@@ -19,11 +19,11 @@ import static no.uib.pap.model.Error.sendError;
 public class Extractor {
 
     // Separate sets of objects are created to have more than one attribute of the
-    // objects like, iReactions or iPathways
+    // objects like, imapReactions or iPathways
     // Other objects like genes, proteins don't need a separate list, because the
     // identifier is the only attribute used.
 
-    private static ImmutableMap<String, Reaction> iReactions; // Reaction stId to Reaction displayName
+    private static ImmutableMap<String, Reaction> imapReactions; // Reaction stId to Reaction displayName
     private static ImmutableMap<String, Pathway> iPathways; // Pathway stId to Pathway instance
     private static ImmutableMap<String, String> iProteins; // Protein accession (UniProt) to name
     private static ImmutableSetMultimap<String, String> imapGenesToProteins = null;
@@ -53,43 +53,45 @@ public class Extractor {
     private static final int swissprotColumnIndex = 5;
     // private static final int nearestGeneColumnIndex = 7;
 
-    static String outputPath = "../../PathwayMatcher/resources/";
+    static String outputPath = "resources/";
 
     public static void main(String[] args) {
 
+        System.out.println("The working directory is: " + System.getProperty("user.dir"));
+
         ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
 
-//        imapProteinsToReactions = getProteinsToReactions();
-//        System.out.println("Finished map proteins to iReactions.");
+        imapProteinsToReactions = getProteinsToReactions();
+        System.out.println("Finished map proteins to imapReactions.");
 
-//        for (int chr = 1; chr <= 22; chr++) {
-//            imapRsIdsToProteins = getRsIdsToProteins(chr);
-//            System.out.println("Finished map rsids to proteins, chromosome " + chr);
-//        }
-//
-//        for (int chr = 1; chr <= 22; chr++) {
-//            imapChrBpToProteins = getChrBpToProteins(chr);
-//            System.out.println("Finished map chrBp to proteins, chromosome " + chr);
-//        }
-//
-//        imapGenesToProteins = getGenesToProteins();
-//        System.out.println("Finished map genes to proteins.");
-//
-//        imapEnsemblToProteins = getEnsemblToProteins();
-//        System.out.println("Finished map ensembl to proteins.");
-//
+        for (int chr = 1; chr <= 22; chr++) {
+            imapRsIdsToProteins = getRsIdsToProteins(chr);
+            System.out.println("Finished map rsids to proteins, chromosome " + chr);
+        }
+
+        for (int chr = 1; chr <= 22; chr++) {
+            imapChrBpToProteins = getChrBpToProteins(chr);
+            System.out.println("Finished map chrBp to proteins, chromosome " + chr);
+        }
+
+        imapGenesToProteins = getGenesToProteins();
+        System.out.println("Finished map genes to proteins.");
+
+        imapEnsemblToProteins = getEnsemblToProteins();
+        System.out.println("Finished map ensembl to proteins.");
+
         imapProteoformsToReactions = getProteoformsToReactions();
         System.out.println("Finished map proteoforms to reactions.");
-//
-//        imapReactionsToPathways = getReactonsToPathways();
-//        System.out.println("Finished map iReactions to iPathways.");
-//
-//        imapPathwaysToTopLevelPathways = getPathwaysToTopLevelPathways();
-//        System.out.println("Finished map iPathways to top level iPathways.");
-//
-//        iProteins = getProteinNames();
-//        System.out.println("Finished getting the protein names.");
-//
+
+        imapReactionsToPathways = getReactonsToPathways();
+        System.out.println("Finished map imapReactions to iPathways.");
+
+        imapPathwaysToTopLevelPathways = getPathwaysToTopLevelPathways();
+        System.out.println("Finished map iPathways to top level iPathways.");
+
+        iProteins = getProteinNames();
+        System.out.println("Finished getting the protein names.");
+
         imapProteinsToComplexes = getProteinsToComplexes();
         System.out.println("Finished map proteins to complexes.");
 
@@ -390,7 +392,7 @@ public class Extractor {
     }
 
     /**
-     * Get list of iReactions
+     * Get list of imapReactions
      */
     public static ImmutableMap<String, Reaction> getReactions() {
 
@@ -407,24 +409,24 @@ public class Extractor {
             builderReactions.put(record.get("stId").asString(), reaction);
         }
 
-        iReactions = builderReactions.build();
+        imapReactions = builderReactions.build();
 
         // Fill the reaction participants
         resultList = ConnectionNeo4j.query(ReactomeQueries.GET_REACTION_PARTICIPANTS);
         for (Record record : resultList) {
             String role = record.get("role").asString().toUpperCase();
-            if (!iReactions.containsKey(record.get("reaction").asString())) {
+            if (!imapReactions.containsKey(record.get("reaction").asString())) {
                 System.out.println("Missing reaction: " + record.get("reaction").asString());
             }
-            iReactions.get(record.get("reaction").asString()).addProteinParticipant(record.get("protein").asString(), Role.valueOf(role));
+            imapReactions.get(record.get("reaction").asString()).addParticipant(record.get("protein").asString(), Role.valueOf(role));
             for (Proteoform proteoform : imapPhysicalEntitiesToProteoforms.get(record.get("physicalEntity").asString())) {
-                iReactions.get(record.get("reaction").asString()).addProteoformParticipant(proteoform, Role.valueOf(role));
+                imapReactions.get(record.get("reaction").asString()).addParticipant(proteoform, Role.valueOf(role));
             }
         }
 
-        // Serialize list of iReactions
-        storeSerialized(iReactions, outputPath + "iReactions.gz");
-        return iReactions;
+        // Serialize list of imapReactions
+        storeSerialized(imapReactions, outputPath + "imapReactions.gz");
+        return imapReactions;
     }
 
     /**
@@ -536,11 +538,11 @@ public class Extractor {
     }
 
     /**
-     * Get mapping from proteins to iReactions
+     * Get mapping from proteins to imapReactions
      */
     public static ImmutableSetMultimap<String, String> getProteinsToReactions() {
 
-        if (iReactions == null) {
+        if (imapReactions == null) {
             getReactions();
         }
 
@@ -591,11 +593,11 @@ public class Extractor {
     }
 
     /**
-     * Get mapping from iReactions to iPathways
+     * Get mapping from imapReactions to iPathways
      */
     private static ImmutableSetMultimap<String, String> getReactonsToPathways() {
 
-        if (iReactions == null) {
+        if (imapReactions == null) {
             getReactions();
         }
         if (iPathways == null) {
@@ -681,6 +683,7 @@ public class Extractor {
             oos.close();
         } catch (IOException e) {
             e.printStackTrace();
+            System.exit(1);
         }
     }
 }
