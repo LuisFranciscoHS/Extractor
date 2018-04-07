@@ -113,8 +113,8 @@ public class Extractor {
         imapSetsToProteoforms = getSetsToProteoforms();
         System.out.println("Finished map sets to proteoforms");
 
-        imapProteoformsToSets = getProteoformsToSets();
-        System.out.println("Finished map proteoforms to sets");
+        imapProteinsToProteoforms = getProteinsToProteoforms();
+        System.out.println("Finished map proteins to proteoforms.");
     }
 
     private static void getComplexComponents() {
