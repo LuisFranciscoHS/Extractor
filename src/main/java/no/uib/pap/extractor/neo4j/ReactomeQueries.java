@@ -63,20 +63,7 @@ public interface ReactomeQueries {
             "RETURN DISTINCT mod.identifier as mod, mod.displayName as name, count(re) as count\n" +
             "ORDER BY count DESC";
 
-    static final String GET_ALL_PROTEOFORMS = "MATCH (pe:PhysicalEntity{speciesName:'Homo sapiens'})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\n" +
-            "WITH DISTINCT pe, re\n" +
-            "OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\n" +
-            "WITH DISTINCT pe.stId AS physicalEntity,\n" +
-            "                re.identifier AS protein,\n" +
-            "                re.variantIdentifier AS isoform,\n" +
-            "                tm.coordinate as coordinate, \n" +
-            "                mod.identifier as type ORDER BY type, coordinate\n" +
-            "WITH DISTINCT physicalEntity,\n" +
-            "\t\t\t\tprotein,\n" +
-            "                CASE WHEN isoform IS NOT NULL THEN isoform ELSE protein END as isoform,\n" +
-            "                COLLECT(type + \":\" + CASE WHEN coordinate IS NOT NULL THEN coordinate ELSE \"null\" END) AS ptms\n" +
-            "                RETURN DISTINCT isoform, ptms\n" +
-            "                ORDER BY isoform, ptms";
+    static final String GET_ALL_PROTEOFORMS = "MATCH (pe:PhysicalEntity{speciesName:'Homo sapiens'})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\nWITH DISTINCT pe, re\nOPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\nWITH DISTINCT pe.stId AS physicalEntity,\n                re.identifier AS protein,\n                re.variantIdentifier AS isoform,\n                tm.coordinate as coordinate, \n                mod.identifier as type ORDER BY type, coordinate\nWITH DISTINCT physicalEntity,\n\t\t\t\tprotein,\n                CASE WHEN isoform IS NOT NULL THEN isoform ELSE protein END as isoform,\n                COLLECT(type + \":\" + CASE WHEN coordinate IS NOT NULL THEN coordinate ELSE \"null\" END) AS ptms\n                RETURN DISTINCT isoform, ptms\n                ORDER BY isoform, ptms";
 
     static final String GET_REACTION_PROTEOFORM_PARTICIPANTS_WITH_ROLE = "MATCH p = (rle:ReactionLikeEvent{speciesName: \"Homo sapiens\"})-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity{speciesName:'Homo sapiens'})-[:referenceEntity]->(re:ReferenceEntity{databaseName:'UniProt'})\n" +
             "WHERE rle.stId = \"R-HSA-419083\"\n" +

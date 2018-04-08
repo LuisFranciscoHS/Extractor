@@ -1,8 +1,9 @@
-package no.uib.pap.extractor.neo4j;
+package no.uib.pap.neo4j;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
+import no.uib.pap.extractor.neo4j.ConnectionNeo4j;
+import no.uib.pap.extractor.neo4j.Extractor;
 import no.uib.pap.model.Proteoform;
 import no.uib.pap.model.ProteoformFormat;
 import no.uib.pap.model.Reaction;
@@ -18,36 +19,6 @@ class ExtractorTest {
     @org.junit.jupiter.api.BeforeEach
     void setUp() {
 
-    }
-
-    @Test
-    void genesToProteinsTest() {
-//
-//        for(String geneName : imapGenesToProteins.keySet()) {
-//            System.out.println(geneName);
-//        }
-//
-//        String geneName = "INSR";
-//        System.out.print(geneName + ": ");
-//        for(String protein : imapGenesToProteins.get(geneName)) {
-//            System.out.print(protein + ", ");
-//        }
-//        System.out.println("");
-    }
-
-    @Test
-    void test() {
-//         for(Pathway pathway : iPathways){
-//         System.out.println(pathway.toString());
-//         }
-//
-//         for (String reaction : imapProteinsToReactions.get("P01308")) {
-//         for (String pathway : imapReactionsToPathways.get(reaction)) {
-//         System.out.println(pathway + "\t" + iPathways.get(pathway).getDisplayName() +
-//         "\t" + reaction + "\t"
-//         + iReactions.get(reaction));
-//         }
-//         }
     }
 
     @Test
