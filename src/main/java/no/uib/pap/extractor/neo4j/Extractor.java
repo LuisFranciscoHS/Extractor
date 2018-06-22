@@ -8,6 +8,7 @@ import org.neo4j.driver.v1.Record;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -74,7 +75,7 @@ public class Extractor {
             System.out.println("Finished map chrBp to proteins, chromosome " + chr);
         }
 
-        imapGenesToProteins = getGenesToProteins();
+        imapGenesToProteins = getGenesToProteinsReactome();
         System.out.println("Finished map genes to proteins.");
 
         imapEnsemblToProteins = getEnsemblToProteins();
@@ -115,6 +116,14 @@ public class Extractor {
 
         imapProteinsToProteoforms = getProteinsToProteoforms();
         System.out.println("Finished map proteins to proteoforms.");
+
+        HashSet<String> peReactions = new HashSet<>(imapPhysicalEntitiesToReactions.values());
+        HashSet<String> uaReactions = new HashSet<>(imapProteinsToReactions.values());
+        HashSet<String> pfReactions = new HashSet<>(imapProteoformsToReactions.values());
+
+        for(Proteoform proteoform : imapProteoformsToReactions.keySet()){
+            System.out.println(proteoform.toString(ProteoformFormat.SIMPLE));
+        }
     }
 
     private static void getComplexComponents() {
@@ -455,7 +464,27 @@ public class Extractor {
         return iPathways;
     }
 
-    public static ImmutableSetMultimap<String, String> getGenesToProteins() {
+    public static ImmutableSetMultimap<String, String> getGenesToProteinsReactome() {
+
+        // Query the database and fill the data structure
+        ImmutableSetMultimap.Builder<String, String> builderGenesToProteins = ImmutableSetMultimap
+                .<String, String>builder();
+        List<Record> resultList = ConnectionNeo4j.query(ReactomeQueries.GET_MAP_GENES_TO_PROTEINS);
+        for (Record record : resultList) {
+            builderGenesToProteins.put(record.get("gene").asString(), record.get("protein").asString());
+        }
+        imapGenesToProteins = builderGenesToProteins.build();
+
+        storeSerialized(imapGenesToProteins, outputPath + "imapGenesToProteins.gz");
+        return imapGenesToProteins;
+    }
+
+    public static ImmutableSetMultimap<String, String> getGenesToProteinsUniprot() throws IOException {
+
+        BufferedReader br = getBufferedReaderFromResource("uniprot-all.fasta");
+
+        String line;
+
 
         // Query the database and fill the data structure
         ImmutableSetMultimap.Builder<String, String> builderGenesToProteins = ImmutableSetMultimap
@@ -664,8 +693,14 @@ public class Extractor {
 
         BufferedReader br = null;
         InputStream fileStream = ClassLoader.getSystemResourceAsStream(fileName);
-        InputStream gzipStream = new GZIPInputStream(fileStream);
-        Reader decoder = new InputStreamReader(gzipStream);
+        Reader decoder = null;
+        if(fileName.endsWith(".gz")){
+            InputStream gzipStream = new GZIPInputStream(fileStream);
+            decoder = new InputStreamReader(gzipStream);
+        }
+        else{
+            decoder = new InputStreamReader(fileStream);
+        }
         br = new BufferedReader(decoder);
 
         return br;
