@@ -8,7 +8,6 @@ import org.neo4j.driver.v1.Record;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -20,41 +19,41 @@ import static no.uib.pap.model.Error.sendError;
 public class Extractor {
 
     // Separate sets of objects are created to have more than one attribute of the
-    // objects like, imapReactions or iPathways
+    // objects like, reactions or pathways
     // Other objects like genes, proteins don't need a separate list, because the
     // identifier is the only attribute used.
 
-    private static ImmutableMap<String, Reaction> imapReactions; // Reaction stId to Reaction displayName
-    private static ImmutableMap<String, Pathway> iPathways; // Pathway stId to Pathway instance
-    private static ImmutableMap<String, String> iProteins; // Protein accession (UniProt) to name
-    private static ImmutableSetMultimap<String, String> imapGenesToProteins = null;
-    private static ImmutableSetMultimap<String, String> imapEnsemblToProteins = null;
-    private static ImmutableSetMultimap<String, String> imapPhysicalEntitiesToReactions = null;
-    private static ImmutableSetMultimap<String, Proteoform> imapPhysicalEntitiesToProteoforms = null;
-    private static ImmutableSetMultimap<Proteoform, String> imapProteoformsToPhysicalEntities = null;
-    private static ImmutableSetMultimap<String, String> imapProteinsToReactions = null;
-    private static ImmutableSetMultimap<String, String> imapReactionsToPathways = null;
-    private static ImmutableSetMultimap<String, String> imapPathwaysToTopLevelPathways = null;
-    private static ImmutableSetMultimap<String, Proteoform> imapProteinsToProteoforms = null;
-    private static ImmutableSetMultimap<Proteoform, String> imapProteoformsToReactions = null;
-    private static ImmutableSetMultimap<String, String> imapProteinsToComplexes = null;
-    private static ImmutableSetMultimap<String, String> imapComplexesToProteins = null;
-    private static ImmutableSetMultimap<String, String> imapSetsToProteins = null;
-    private static ImmutableSetMultimap<String, String> imapProteinsToSets = null;
-    private static ImmutableSetMultimap<Proteoform, String> imapProteoformsToComplexes = null;
-    private static ImmutableSetMultimap<String, Proteoform> imapComplexesToProteoforms = null;
-    private static ImmutableSetMultimap<Proteoform, String> imapProteoformsToSets = null;
-    private static ImmutableSetMultimap<String, Proteoform> imapSetsToProteoforms = null;
+    private static ImmutableMap<String, Reaction> reactions; // Reaction stId to Reaction displayName
+    private static ImmutableMap<String, Pathway> pathways; // Pathway stId to Pathway instance
+    private static ImmutableMap<String, String> proteins; // Protein accession (UniProt) to name
+    private static ImmutableSetMultimap<String, String> genesToProteins = null;
+    private static ImmutableSetMultimap<String, String> ensemblToProteins = null;
+    private static ImmutableSetMultimap<String, String> physicalEntitiesToReactions = null;
+    private static ImmutableSetMultimap<String, Proteoform> physicalEntitiesToProteoforms = null;
+    private static ImmutableSetMultimap<Proteoform, String> proteoformsToPhysicalEntities = null;
+    private static ImmutableSetMultimap<String, String> proteinsToReactions = null;
+    private static ImmutableSetMultimap<String, String> reactionsToPathways = null;
+    private static ImmutableSetMultimap<String, String> pathwaysToTopLevelPathways = null;
+    private static ImmutableSetMultimap<String, Proteoform> proteinsToProteoforms = null;
+    private static ImmutableSetMultimap<Proteoform, String> proteoformsToReactions = null;
+    private static ImmutableSetMultimap<String, String> proteinsToComplexes = null;
+    private static ImmutableSetMultimap<String, String> complexesToProteins = null;
+    private static ImmutableSetMultimap<String, String> setsToProteins = null;
+    private static ImmutableSetMultimap<String, String> proteinsToSets = null;
+    private static ImmutableSetMultimap<Proteoform, String> proteoformsToComplexes = null;
+    private static ImmutableSetMultimap<String, Proteoform> complexesToProteoforms = null;
+    private static ImmutableSetMultimap<Proteoform, String> proteoformsToSets = null;
+    private static ImmutableSetMultimap<String, Proteoform> setsToProteoforms = null;
 
-    private static ImmutableSetMultimap<String, String> imapRsIdsToProteins = null; // An array of multimaps, one for each chromosome. Added one extra to use natural 1-based numbering.
-    private static ImmutableSetMultimap<Long, String> imapChrBpToProteins = null;
+    private static ImmutableSetMultimap<String, String> rsIdsToProteins = null; // An array of multimaps, one for each chromosome. Added one extra to use natural 1-based numbering.
+    private static ImmutableSetMultimap<Long, String> chrBpToProteins = null;
 
     private static final int rsidColumnIndex = 2;
     // private static final int ensemblColumnIndex = 4;
     private static final int swissprotColumnIndex = 5;
     // private static final int nearestGeneColumnIndex = 7;
 
-    static String outputPath = "resources/";
+    private static String outputPath = "resources/";
 
     public static void main(String[] args) {
 
@@ -62,73 +61,69 @@ public class Extractor {
 
         ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
 
-        imapProteinsToReactions = getProteinsToReactions();
-        System.out.println("Finished map proteins to imapReactions.");
+        proteinsToReactions = getProteinsToReactions();
+        System.out.println("Finished map proteins to reactions.");
 
         for (int chr = 1; chr <= 22; chr++) {
-            imapRsIdsToProteins = getRsIdsToProteins(chr);
+            rsIdsToProteins = getRsIdsToProteins(chr);
             System.out.println("Finished map rsids to proteins, chromosome " + chr);
         }
 
         for (int chr = 1; chr <= 22; chr++) {
-            imapChrBpToProteins = getChrBpToProteins(chr);
+            chrBpToProteins = getChrBpToProteins(chr);
             System.out.println("Finished map chrBp to proteins, chromosome " + chr);
         }
 
-        imapGenesToProteins = getGenesToProteinsReactome();
+        genesToProteins = getGenesToProteinsReactome();
         System.out.println("Finished map genes to proteins.");
 
-        imapEnsemblToProteins = getEnsemblToProteins();
+        ensemblToProteins = getEnsemblToProteins();
         System.out.println("Finished map ensembl to proteins.");
 
-        imapProteoformsToReactions = getProteoformsToReactions();
+        proteoformsToReactions = getProteoformsToReactions();
         System.out.println("Finished map proteoforms to reactions.");
 
-        imapReactionsToPathways = getReactonsToPathways();
-        System.out.println("Finished map imapReactions to iPathways.");
+        reactionsToPathways = getReactonsToPathways();
+        System.out.println("Finished map reactions to pathways.");
 
-        imapPathwaysToTopLevelPathways = getPathwaysToTopLevelPathways();
-        System.out.println("Finished map iPathways to top level iPathways.");
+        pathwaysToTopLevelPathways = getPathwaysToTopLevelPathways();
+        System.out.println("Finished map pathways to top level pathways.");
 
-        iProteins = getProteinNames();
+        proteins = getProteinNames();
         System.out.println("Finished getting the protein names.");
 
-        imapProteinsToComplexes = getProteinsToComplexes();
+        proteinsToComplexes = getProteinsToComplexes();
         System.out.println("Finished map proteins to complexes.");
 
-        imapComplexesToProteins = getComplexesToProteins();
+        complexesToProteins = getComplexesToProteins();
         System.out.println("Finished map of complexes to proteins.");
 
-        imapProteoformsToComplexes = getProteoformsToComplexes();
+        proteoformsToComplexes = getProteoformsToComplexes();
         System.out.println("Finished map of proteoforms to complexes");
 
-        imapComplexesToProteoforms = getComplexesToProteoforms();
+        complexesToProteoforms = getComplexesToProteoforms();
         System.out.println("Finished map of complexes to proteoforms");
 
-        imapSetsToProteins = getSetsToProteins();
+        setsToProteins = getSetsToProteins();
         System.out.println("Finished map of sets to proteins.");
 
-        imapProteinsToSets = getProteinsToSets();
+        proteinsToSets = getProteinsToSets();
         System.out.println("Finished map proteins to sets");
 
-        imapSetsToProteoforms = getSetsToProteoforms();
+        setsToProteoforms = getSetsToProteoforms();
         System.out.println("Finished map sets to proteoforms");
 
-        imapProteinsToProteoforms = getProteinsToProteoforms();
+        proteinsToProteoforms = getProteinsToProteoforms();
         System.out.println("Finished map proteins to proteoforms.");
 
-        HashSet<String> peReactions = new HashSet<>(imapPhysicalEntitiesToReactions.values());
-        HashSet<String> uaReactions = new HashSet<>(imapProteinsToReactions.values());
-        HashSet<String> pfReactions = new HashSet<>(imapProteoformsToReactions.values());
-
-        for(Proteoform proteoform : imapProteoformsToReactions.keySet()){
+        for(Proteoform proteoform : proteoformsToReactions.keySet()){
             System.out.println(proteoform.toString(ProteoformFormat.SIMPLE));
         }
     }
 
     private static void getComplexComponents() {
 
-        if (imapPhysicalEntitiesToProteoforms == null) {
+        if (physicalEntitiesToProteoforms == null) {
             getPhysicalEntitiesToProteoforms();
         }
 
@@ -143,56 +138,56 @@ public class Extractor {
             builderComplexesToProteins.put(record.get("complex").asString(), record.get("protein").asString());
             builderProteinsToComplexes.put(record.get("protein").asString(), record.get("complex").asString());
 
-            for (Proteoform proteoform : imapPhysicalEntitiesToProteoforms.get(record.get("physicalEntity").asString())) {
+            for (Proteoform proteoform : physicalEntitiesToProteoforms.get(record.get("physicalEntity").asString())) {
                 builderComplexesToProteoforms.put(record.get("complex").asString(), proteoform);
                 builderProteoformsToComplexes.put(proteoform, record.get("complex").asString());
             }
         }
 
-        imapComplexesToProteins = builderComplexesToProteins.build();
-        imapProteinsToComplexes = builderProteinsToComplexes.build();
-        imapComplexesToProteoforms = builderComplexesToProteoforms.build();
-        imapProteoformsToComplexes = builderProteoformsToComplexes.build();
+        complexesToProteins = builderComplexesToProteins.build();
+        proteinsToComplexes = builderProteinsToComplexes.build();
+        complexesToProteoforms = builderComplexesToProteoforms.build();
+        proteoformsToComplexes = builderProteoformsToComplexes.build();
 
-        storeSerialized(imapComplexesToProteins, outputPath + "imapComplexesToProteins.gz");
-        storeSerialized(imapProteinsToComplexes, outputPath + "imapProteinsToComplexes.gz");
-        storeSerialized(imapComplexesToProteoforms, outputPath + "imapComplexesToProteoforms.gz");
-        storeSerialized(imapProteoformsToComplexes, outputPath + "imapProteoformsToComplexes.gz");
+        storeSerialized(complexesToProteins, outputPath + "complexesToProteins.gz");
+        storeSerialized(proteinsToComplexes, outputPath + "proteinsToComplexes.gz");
+        storeSerialized(complexesToProteoforms, outputPath + "complexesToProteoforms.gz");
+        storeSerialized(proteoformsToComplexes, outputPath + "proteoformsToComplexes.gz");
     }
 
     public static ImmutableSetMultimap<String, String> getComplexesToProteins() {
-        if (imapComplexesToProteins == null) {
+        if (complexesToProteins == null) {
             getComplexComponents();
         }
 
-        return imapComplexesToProteins;
+        return complexesToProteins;
     }
 
 
     public static ImmutableSetMultimap<String, String> getProteinsToComplexes() {
-        if (imapProteinsToComplexes == null) {
+        if (proteinsToComplexes == null) {
             getComplexComponents();
         }
-        return imapProteinsToComplexes;
+        return proteinsToComplexes;
     }
 
     public static ImmutableSetMultimap<String, Proteoform> getComplexesToProteoforms() {
-        if (imapComplexesToProteoforms == null) {
+        if (complexesToProteoforms == null) {
             getComplexComponents();
         }
 
-        return imapComplexesToProteoforms;
+        return complexesToProteoforms;
     }
 
     public static ImmutableSetMultimap<Proteoform, String> getProteoformsToComplexes() {
-        if (imapProteoformsToComplexes == null) {
+        if (proteoformsToComplexes == null) {
             getComplexComponents();
         }
-        return imapProteoformsToComplexes;
+        return proteoformsToComplexes;
     }
 
     public static ImmutableSetMultimap<String, String> getSetMembersAndCandidates() {
-        if(imapPhysicalEntitiesToProteoforms == null){
+        if(physicalEntitiesToProteoforms == null){
             getPhysicalEntitiesToProteoforms();
         }
 
@@ -206,64 +201,64 @@ public class Extractor {
         for (Record record : resultList) {
             builderSetsToProteins.put(record.get("set").asString(), record.get("protein").asString());
             builderProteinsToSets.put(record.get("protein").asString(), record.get("set").asString());
-            for (Proteoform proteoform : imapPhysicalEntitiesToProteoforms.get(record.get("physicalEntity").asString())) {
+            for (Proteoform proteoform : physicalEntitiesToProteoforms.get(record.get("physicalEntity").asString())) {
                 builderSetsToProteoforms.put(record.get("set").asString(), proteoform);
                 builderProteoformsToSets.put(proteoform, record.get("set").asString());
             }
         }
 
-        imapSetsToProteins = builderSetsToProteins.build();
-        imapProteinsToSets = builderProteinsToSets.build();
-        imapSetsToProteoforms = builderSetsToProteoforms.build();
-        imapProteoformsToSets = builderProteoformsToSets.build();
+        setsToProteins = builderSetsToProteins.build();
+        proteinsToSets = builderProteinsToSets.build();
+        setsToProteoforms = builderSetsToProteoforms.build();
+        proteoformsToSets = builderProteoformsToSets.build();
 
-        storeSerialized(imapSetsToProteins, outputPath + "imapSetsToProteins.gz");
-        storeSerialized(imapProteinsToSets, outputPath + "imapProteinsToSets.gz");
-        storeSerialized(imapSetsToProteoforms, outputPath + "imapSetsToProteoforms.gz");
-        storeSerialized(imapProteoformsToSets, outputPath + "imapProteoformsToSets.gz");
+        storeSerialized(setsToProteins, outputPath + "setsToProteins.gz");
+        storeSerialized(proteinsToSets, outputPath + "proteinsToSets.gz");
+        storeSerialized(setsToProteoforms, outputPath + "setsToProteoforms.gz");
+        storeSerialized(proteoformsToSets, outputPath + "proteoformsToSets.gz");
 
-        return imapSetsToProteins;
+        return setsToProteins;
     }
 
     public static ImmutableSetMultimap<String, String> getSetsToProteins() {
-        if (imapSetsToProteins == null) {
+        if (setsToProteins == null) {
             getSetMembersAndCandidates();
         }
 
-        return imapSetsToProteins;
+        return setsToProteins;
     }
 
 
     public static ImmutableSetMultimap<String, String> getProteinsToSets() {
-        if (imapProteinsToSets == null) {
+        if (proteinsToSets == null) {
             getSetMembersAndCandidates();
         }
-        return imapProteinsToSets;
+        return proteinsToSets;
     }
 
     public static ImmutableSetMultimap<String, Proteoform> getSetsToProteoforms() {
-        if (imapSetsToProteoforms == null) {
+        if (setsToProteoforms == null) {
             getSetMembersAndCandidates();
         }
 
-        return imapSetsToProteoforms;
+        return setsToProteoforms;
     }
 
     public static ImmutableSetMultimap<Proteoform, String> getProteoformsToSets() {
-        if (imapProteoformsToSets == null) {
+        if (proteoformsToSets == null) {
             getSetMembersAndCandidates();
         }
-        return imapProteoformsToSets;
+        return proteoformsToSets;
     }
 
 
     public static ImmutableSetMultimap<String, String> getRsIdsToProteins(int chr) {
 
-        if (imapProteinsToReactions == null) {
+        if (proteinsToReactions == null) {
             getProteinsToReactions();
         }
 
-        ImmutableSetMultimap.Builder<String, String> builderRsIdsToProteins = ImmutableSetMultimap.<String, String>builder();
+        ImmutableSetMultimap.Builder<String, String> builderRsIdsToProteins = ImmutableSetMultimap.builder();
 
         // Traverse all the vepTables
 
@@ -281,7 +276,7 @@ public class Extractor {
                     String protein = snpToSwissprotPair.getValue();
 
                     if (!protein.equals("NA")) {
-                        if (imapProteinsToReactions.containsKey(protein)) {
+                        if (proteinsToReactions.containsKey(protein)) {
                             builderRsIdsToProteins.put(snp.getRsid(), protein);
                         }
                     }
@@ -292,20 +287,20 @@ public class Extractor {
         }
 
 
-        imapRsIdsToProteins = builderRsIdsToProteins.build();
+        rsIdsToProteins = builderRsIdsToProteins.build();
 
-        storeSerialized(imapRsIdsToProteins, outputPath + "imapRsIdsToProteins" + chr + ".gz");
+        storeSerialized(rsIdsToProteins, outputPath + "rsIdsToProteins" + chr + ".gz");
 
-        return imapRsIdsToProteins;
+        return rsIdsToProteins;
     }
 
     public static ImmutableSetMultimap<Long, String> getChrBpToProteins(int chr) {
 
-        if (imapProteinsToReactions == null) {
+        if (proteinsToReactions == null) {
             getProteinsToReactions();
         }
 
-        ImmutableSetMultimap.Builder<Long, String> builderChrBpToProteins = ImmutableSetMultimap.<Long, String>builder();
+        ImmutableSetMultimap.Builder<Long, String> builderChrBpToProteins = ImmutableSetMultimap.builder();
 
         // Traverse all the vepTables
 
@@ -323,7 +318,7 @@ public class Extractor {
                     String protein = snpToSwissprotPair.getValue();
 
                     if (!protein.equals("NA")) {
-                        if (imapProteinsToReactions.containsKey(protein)) {
+                        if (proteinsToReactions.containsKey(protein)) {
                             builderChrBpToProteins.put(snp.getBp(), protein);
                         }
                     }
@@ -333,37 +328,36 @@ public class Extractor {
             sendError(ERROR_READING_VEP_TABLES, chr);
         }
 
-        imapChrBpToProteins = builderChrBpToProteins.build();
+        chrBpToProteins = builderChrBpToProteins.build();
 
-        storeSerialized(imapChrBpToProteins, outputPath + "imapChrBpToProteins" + chr + ".gz");
-        return imapChrBpToProteins;
+        storeSerialized(chrBpToProteins, outputPath + "chrBpToProteins" + chr + ".gz");
+        return chrBpToProteins;
     }
 
     public static ImmutableSetMultimap<String, Proteoform> getProteinsToProteoforms() {
 
         // Make sure the full list of proteoforms is loaded
-        if (imapProteoformsToPhysicalEntities == null) {
+        if (proteoformsToPhysicalEntities == null) {
             getPhysicalEntitiesToProteoforms();
         }
 
-        ImmutableSetMultimap.Builder<String, Proteoform> builderProteinsToProteoforms = ImmutableSetMultimap
-                .<String, Proteoform>builder();
+        ImmutableSetMultimap.Builder<String, Proteoform> builderProteinsToProteoforms = ImmutableSetMultimap.builder();
 
         //Traverse the list of proteoforms to get the protein accessions
-        for (Proteoform proteoform : imapProteoformsToPhysicalEntities.keySet()) {
+        for (Proteoform proteoform : proteoformsToPhysicalEntities.keySet()) {
             builderProteinsToProteoforms.put(proteoform.getUniProtAcc(), proteoform);
         }
 
-        imapProteinsToProteoforms = builderProteinsToProteoforms.build();
-        storeSerialized(imapProteinsToProteoforms, outputPath + "imapProteinsToProteoforms.gz");
+        proteinsToProteoforms = builderProteinsToProteoforms.build();
+        storeSerialized(proteinsToProteoforms, outputPath + "proteinsToProteoforms.gz");
 
-        return imapProteinsToProteoforms;
+        return proteinsToProteoforms;
     }
 
-    public static ImmutableSetMultimap<String, Proteoform> getPhysicalEntitiesToProteoforms() {
+    static ImmutableSetMultimap<String, Proteoform> getPhysicalEntitiesToProteoforms() {
 
-        ImmutableSetMultimap.Builder<String, Proteoform> builderPhysicalEntitiesToProteoforms = ImmutableSetMultimap.<String, Proteoform>builder();
-        ImmutableSetMultimap.Builder<Proteoform, String> builderProteoformsToPhysicalEntities = ImmutableSetMultimap.<Proteoform, String>builder();
+        ImmutableSetMultimap.Builder<String, Proteoform> builderPhysicalEntitiesToProteoforms = ImmutableSetMultimap.builder();
+        ImmutableSetMultimap.Builder<Proteoform, String> builderProteoformsToPhysicalEntities = ImmutableSetMultimap.builder();
 
         List<Record> resultList = ConnectionNeo4j.query(ReactomeQueries.GET_MAP_PROTEOFORMS_TO_PHYSICALENTITIES);
         for (Record record : resultList) {
@@ -387,25 +381,25 @@ public class Extractor {
             }
         }
 
-        imapPhysicalEntitiesToProteoforms = builderPhysicalEntitiesToProteoforms.build();
-        imapProteoformsToPhysicalEntities = builderProteoformsToPhysicalEntities.build();
+        physicalEntitiesToProteoforms = builderPhysicalEntitiesToProteoforms.build();
+        proteoformsToPhysicalEntities = builderProteoformsToPhysicalEntities.build();
 
-        return imapPhysicalEntitiesToProteoforms;
+        return physicalEntitiesToProteoforms;
     }
 
-    public static ImmutableSetMultimap<Proteoform, String> getProteoformsToPhysicalEntities() {
-        if (imapProteoformsToPhysicalEntities == null) {
+    static ImmutableSetMultimap<Proteoform, String> getProteoformsToPhysicalEntities() {
+        if (proteoformsToPhysicalEntities == null) {
             getPhysicalEntitiesToProteoforms();
         }
-        return imapProteoformsToPhysicalEntities;
+        return proteoformsToPhysicalEntities;
     }
 
     /**
-     * Get list of imapReactions
+     * Get list of reactions
      */
     public static ImmutableMap<String, Reaction> getReactions() {
 
-        if (imapPhysicalEntitiesToProteoforms == null) {
+        if (physicalEntitiesToProteoforms == null) {
             getPhysicalEntitiesToProteoforms();
         }
 
@@ -418,28 +412,28 @@ public class Extractor {
             builderReactions.put(record.get("stId").asString(), reaction);
         }
 
-        imapReactions = builderReactions.build();
+        reactions = builderReactions.build();
 
         // Fill the reaction participants
         resultList = ConnectionNeo4j.query(ReactomeQueries.GET_REACTION_PARTICIPANTS);
         for (Record record : resultList) {
             String role = record.get("role").asString().toUpperCase();
-            if (!imapReactions.containsKey(record.get("reaction").asString())) {
+            if (!reactions.containsKey(record.get("reaction").asString())) {
                 System.out.println("Missing reaction: " + record.get("reaction").asString());
             }
-            imapReactions.get(record.get("reaction").asString()).addParticipant(record.get("protein").asString(), Role.valueOf(role));
-            for (Proteoform proteoform : imapPhysicalEntitiesToProteoforms.get(record.get("physicalEntity").asString())) {
-                imapReactions.get(record.get("reaction").asString()).addParticipant(proteoform, Role.valueOf(role));
+            reactions.get(record.get("reaction").asString()).addParticipant(record.get("protein").asString(), Role.valueOf(role));
+            for (Proteoform proteoform : physicalEntitiesToProteoforms.get(record.get("physicalEntity").asString())) {
+                reactions.get(record.get("reaction").asString()).addParticipant(proteoform, Role.valueOf(role));
             }
         }
 
-        // Serialize list of imapReactions
-        storeSerialized(imapReactions, outputPath + "imapReactions.gz");
-        return imapReactions;
+        // Serialize list of reactions
+        storeSerialized(reactions, outputPath + "reactions.gz");
+        return reactions;
     }
 
     /**
-     * Get list of iPathways
+     * Get list of pathways
      */
     public static ImmutableMap<String, Pathway> getPathways() {
 
@@ -457,11 +451,11 @@ public class Extractor {
             builderPathways.put(pathway.getStId(), pathway);
         }
 
-        iPathways = builderPathways.build();
+        pathways = builderPathways.build();
 
-        // Serialize iPathways
-        storeSerialized(iPathways, outputPath + "iPathways.gz");
-        return iPathways;
+        // Serialize pathways
+        storeSerialized(pathways, outputPath + "pathways.gz");
+        return pathways;
     }
 
     public static ImmutableSetMultimap<String, String> getGenesToProteinsReactome() {
@@ -473,30 +467,10 @@ public class Extractor {
         for (Record record : resultList) {
             builderGenesToProteins.put(record.get("gene").asString(), record.get("protein").asString());
         }
-        imapGenesToProteins = builderGenesToProteins.build();
+        genesToProteins = builderGenesToProteins.build();
 
-        storeSerialized(imapGenesToProteins, outputPath + "imapGenesToProteins.gz");
-        return imapGenesToProteins;
-    }
-
-    public static ImmutableSetMultimap<String, String> getGenesToProteinsUniprot() throws IOException {
-
-        BufferedReader br = getBufferedReaderFromResource("uniprot-all.fasta");
-
-        String line;
-
-
-        // Query the database and fill the data structure
-        ImmutableSetMultimap.Builder<String, String> builderGenesToProteins = ImmutableSetMultimap
-                .<String, String>builder();
-        List<Record> resultList = ConnectionNeo4j.query(ReactomeQueries.GET_MAP_GENES_TO_PROTEINS);
-        for (Record record : resultList) {
-            builderGenesToProteins.put(record.get("gene").asString(), record.get("protein").asString());
-        }
-        imapGenesToProteins = builderGenesToProteins.build();
-
-        storeSerialized(imapGenesToProteins, outputPath + "imapGenesToProteins.gz");
-        return imapGenesToProteins;
+        storeSerialized(genesToProteins, outputPath + "genesToProteins.gz");
+        return genesToProteins;
     }
 
     public static ImmutableSetMultimap<String, String> getEnsemblToProteins() {
@@ -508,16 +482,16 @@ public class Extractor {
         for (Record record : resultList) {
             builderEnsemblToProteins.put(record.get("ensembl").asString(), record.get("uniprot").asString());
         }
-        imapEnsemblToProteins = builderEnsemblToProteins.build();
+        ensemblToProteins = builderEnsemblToProteins.build();
 
-        storeSerialized(imapEnsemblToProteins, outputPath + "imapEnsemblToProteins.gz");
-        return imapEnsemblToProteins;
+        storeSerialized(ensemblToProteins, outputPath + "ensemblToProteins.gz");
+        return ensemblToProteins;
     }
 
     /**
      * Get physical entities to reactions mapping
      */
-    public static ImmutableSetMultimap<String, String> getPhysicalEntitiesToReactions() {
+    static ImmutableSetMultimap<String, String> getPhysicalEntitiesToReactions() {
 
         ImmutableSetMultimap.Builder<String, String> builderPhysicalEntitiesToReactions = ImmutableSetMultimap
                 .<String, String>builder();
@@ -530,8 +504,8 @@ public class Extractor {
             );
         }
 
-        imapPhysicalEntitiesToReactions = builderPhysicalEntitiesToReactions.build();
-        return imapPhysicalEntitiesToReactions;
+        physicalEntitiesToReactions = builderPhysicalEntitiesToReactions.build();
+        return physicalEntitiesToReactions;
     }
 
 
@@ -541,43 +515,43 @@ public class Extractor {
      *
      * @return
      */
-    public static ImmutableSetMultimap<Proteoform, String> getProteoformsToReactions() {
-        if (imapPhysicalEntitiesToReactions == null) {
+    static ImmutableSetMultimap<Proteoform, String> getProteoformsToReactions() {
+        if (physicalEntitiesToReactions == null) {
             getPhysicalEntitiesToReactions();
         }
-        if (imapProteoformsToPhysicalEntities == null) {
+        if (proteoformsToPhysicalEntities == null) {
             getPhysicalEntitiesToProteoforms();
         }
 
         ImmutableSetMultimap.Builder<Proteoform, String> builderProteoformsToReactions = ImmutableSetMultimap
-                .<Proteoform, String>builder();
+                .builder();
 
-        for (Map.Entry<Proteoform, String> proteoformToPhysicalEntity : imapProteoformsToPhysicalEntities.entries()) {
+        for (Map.Entry<Proteoform, String> proteoformToPhysicalEntity : proteoformsToPhysicalEntities.entries()) {
 
-            for (String reaction : imapPhysicalEntitiesToReactions.get(proteoformToPhysicalEntity.getValue())) {
+            for (String reaction : physicalEntitiesToReactions.get(proteoformToPhysicalEntity.getValue())) {
                 builderProteoformsToReactions.put(proteoformToPhysicalEntity.getKey(), reaction);
             }
         }
 
-        imapProteoformsToReactions = builderProteoformsToReactions.build();
+        proteoformsToReactions = builderProteoformsToReactions.build();
 
-        storeSerialized(imapProteoformsToReactions, outputPath + "imapProteoformsToReactions.gz");
+        storeSerialized(proteoformsToReactions, outputPath + "proteoformsToReactions.gz");
 
-        return imapProteoformsToReactions;
+        return proteoformsToReactions;
     }
 
     /**
-     * Get mapping from proteins to imapReactions
+     * Get mapping from proteins to reactions
      */
-    public static ImmutableSetMultimap<String, String> getProteinsToReactions() {
+    static ImmutableSetMultimap<String, String> getProteinsToReactions() {
 
-        if (imapReactions == null) {
+        if (reactions == null) {
             getReactions();
         }
 
         // Query the database and fill the data structure
         ImmutableSetMultimap.Builder<String, String> builderProteinsToReactions = ImmutableSetMultimap
-                .<String, String>builder();
+                .builder();
         List<Record> resultList = ConnectionNeo4j.query(ReactomeQueries.GET_MAP_PROTEINS_TO_REACTIONS);
 
         for (Record record : resultList) {
@@ -588,9 +562,9 @@ public class Extractor {
             }
         }
 
-        imapProteinsToReactions = builderProteinsToReactions.build();
-        storeSerialized(imapProteinsToReactions, outputPath + "imapProteinsToReactions.gz");
-        return imapProteinsToReactions;
+        proteinsToReactions = builderProteinsToReactions.build();
+        storeSerialized(proteinsToReactions, outputPath + "proteinsToReactions.gz");
+        return proteinsToReactions;
     }
 
     public static ImmutableMap<String, String> getProteinNames() {
@@ -616,20 +590,20 @@ public class Extractor {
             }
         }
 
-        iProteins = proteinsBuilder.build();
-        storeSerialized(iProteins, outputPath + "iProteins.gz");
-        return iProteins;
+        proteins = proteinsBuilder.build();
+        storeSerialized(proteins, outputPath + "proteins.gz");
+        return proteins;
     }
 
     /**
-     * Get mapping from imapReactions to iPathways
+     * Get mapping from reactions to pathways
      */
     private static ImmutableSetMultimap<String, String> getReactonsToPathways() {
 
-        if (imapReactions == null) {
+        if (reactions == null) {
             getReactions();
         }
-        if (iPathways == null) {
+        if (pathways == null) {
             getPathways();
         }
 
@@ -641,18 +615,18 @@ public class Extractor {
             builderReactionsToPathways.put(record.get("reaction").asString(), record.get("pathway").asString());
         }
 
-        imapReactionsToPathways = builderReactionsToPathways.build();
+        reactionsToPathways = builderReactionsToPathways.build();
 
-        storeSerialized(imapReactionsToPathways, outputPath + "imapReactionsToPathways.gz");
-        return imapReactionsToPathways;
+        storeSerialized(reactionsToPathways, outputPath + "reactionsToPathways.gz");
+        return reactionsToPathways;
     }
 
     /**
-     * Get mapping from iPathways to top level iPathways
+     * Get mapping from pathways to top level pathways
      */
-    public static ImmutableSetMultimap<String, String> getPathwaysToTopLevelPathways() {
+    static ImmutableSetMultimap<String, String> getPathwaysToTopLevelPathways() {
 
-        if (iPathways.size() == 0) {
+        if (pathways.size() == 0) {
             getPathways();
         }
 
@@ -665,13 +639,13 @@ public class Extractor {
                     record.get("topLevelPathway").asString());
         }
 
-        imapPathwaysToTopLevelPathways = builderPathwaysToTopLevelPathways.build();
+        pathwaysToTopLevelPathways = builderPathwaysToTopLevelPathways.build();
 
-        storeSerialized(imapPathwaysToTopLevelPathways, outputPath + "imapPathwaysToTopLevelPathways.gz");
-        return imapPathwaysToTopLevelPathways;
+        storeSerialized(pathwaysToTopLevelPathways, outputPath + "pathwaysToTopLevelPathways.gz");
+        return pathwaysToTopLevelPathways;
     }
 
-    public static Multimap<Snp, String> getSNPAndSwissProtFromVep(String line) {
+    static Multimap<Snp, String> getSNPAndSwissProtFromVep(String line) {
         ImmutableSetMultimap.Builder<Snp, String> builder = ImmutableSetMultimap.<Snp, String>builder();
         String[] fields = line.split(" ");
         Integer chr = Integer.valueOf(fields[0]);

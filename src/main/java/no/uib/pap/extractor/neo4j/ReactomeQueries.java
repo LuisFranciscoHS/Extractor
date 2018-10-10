@@ -107,3 +107,4 @@ public interface ReactomeQueries {
             "                COLLECT(type + \":\" + CASE WHEN coordinate IS NOT NULL THEN coordinate ELSE \"null\" END) AS ptms\n" +
             "RETURN DISTINCT set, protein, (CASE WHEN isoform IS NOT NULL THEN isoform ELSE protein END + ptms) as proteoform";
 }
+

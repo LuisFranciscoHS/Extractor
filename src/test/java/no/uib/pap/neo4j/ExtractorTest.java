@@ -49,11 +49,11 @@ class ExtractorTest {
         ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
         ImmutableMap<String, Reaction> iReactions = Extractor.getReactions();
 
-        assertEquals(4, iReactions.get("R-HSA-2230938").getProteinParticipants().keySet().size());
-        assertTrue(iReactions.get("R-HSA-2230938").getProteinParticipants().containsKey("P00738"));
-        assertTrue(iReactions.get("R-HSA-2230938").getProteinParticipants().containsKey("P69905"));
-        assertTrue(iReactions.get("R-HSA-2230938").getProteinParticipants().containsKey("Q86VB7"));
-        assertTrue(iReactions.get("R-HSA-2230938").getProteinParticipants().containsKey("P68871"));
+        assertEquals(76, iReactions.get("R-HSA-1112666").getProteinParticipantsWithRole().keySet().size());
+        assertTrue(iReactions.get("R-HSA-1112666").getProteinParticipantsWithRole().containsKey("A0A075B6P5"));
+        assertTrue(iReactions.get("R-HSA-1112666").getProteinParticipantsWithRole().containsKey("P01593"));
+        assertTrue(iReactions.get("R-HSA-1112666").getProteinParticipantsWithRole().containsKey("P01611"));
+        assertTrue(iReactions.get("R-HSA-1112666").getProteinParticipantsWithRole().containsKey("A0M8Q6"));
     }
 
     @Test
@@ -61,20 +61,22 @@ class ExtractorTest {
         ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
         ImmutableMap<String, Reaction> iReactions = Extractor.getReactions();
 
-        assertEquals(2, iReactions.get("R-HSA-74716").getProteinParticipants().keySet().size());
-        assertTrue(iReactions.get("R-HSA-74716").getProteinParticipants().containsKey("P06213"));
-        assertTrue(iReactions.get("R-HSA-74716").getProteinParticipants().containsKey("P01308"));
+        assertEquals(2, iReactions.get("R-HSA-74716").getProteinParticipantsWithRole().keySet().size());
+        assertTrue(iReactions.get("R-HSA-74716").getProteinParticipantsWithRole().containsKey("P06213"));
+        assertTrue(iReactions.get("R-HSA-74716").getProteinParticipantsWithRole().containsKey("P01308"));
 
-        assertEquals(1, iReactions.get("R-HSA-74730").getProteinParticipants().keySet().size());
-        assertTrue(iReactions.get("R-HSA-74730").getProteinParticipants().containsKey("P01308"));
+        assertEquals(2, iReactions.get("R-HSA-109862").getProteinParticipantsWithRole().keySet().size());
+        assertEquals(6, iReactions.get("R-HSA-109862").getProteinParticipantsWithRole().entries().size());
+        assertTrue(iReactions.get("R-HSA-109862").getProteinParticipantsWithRole().containsKey("P28482"));
+        assertTrue(iReactions.get("R-HSA-109862").getProteinParticipantsWithRole().containsKey("P36507"));
 
-        assertEquals(2, iReactions.get("R-HSA-74716").getProteinParticipants().keySet().size());
-        assertTrue(iReactions.get("R-HSA-74716").getProteinParticipants().containsKey("P01308"));
-        assertTrue(iReactions.get("R-HSA-74716").getProteinParticipants().containsKey("P06213"));
+        assertEquals(2, iReactions.get("R-HSA-74716").getProteinParticipantsWithRole().keySet().size());
+        assertTrue(iReactions.get("R-HSA-74716").getProteinParticipantsWithRole().containsKey("P01308"));
+        assertTrue(iReactions.get("R-HSA-74716").getProteinParticipantsWithRole().containsKey("P06213"));
 
-        assertEquals(2, iReactions.get("R-HSA-74726").getProteinParticipants().keySet().size());
-        assertTrue(iReactions.get("R-HSA-74726").getProteinParticipants().containsKey("P01308"));
-        assertTrue(iReactions.get("R-HSA-74726").getProteinParticipants().containsKey("P06213"));
+        assertEquals(2, iReactions.get("R-HSA-74726").getProteinParticipantsWithRole().keySet().size());
+        assertTrue(iReactions.get("R-HSA-74726").getProteinParticipantsWithRole().containsKey("P01308"));
+        assertTrue(iReactions.get("R-HSA-74726").getProteinParticipantsWithRole().containsKey("P06213"));
     }
 
     @Test
@@ -82,8 +84,8 @@ class ExtractorTest {
         ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
         ImmutableMap<String, Reaction> iReactions = Extractor.getReactions();
 
-        assertEquals(1, iReactions.get("R-HSA-71118").getProteinParticipants().size());
-        assertTrue(iReactions.get("R-HSA-71118").getProteinParticipants().containsEntry("P00439", Role.CATALYSTACTIVITY));
+        assertEquals(1, iReactions.get("R-HSA-71118").getProteinParticipantsWithRole().size());
+        assertTrue(iReactions.get("R-HSA-71118").getProteinParticipantsWithRole().containsEntry("P00439", Role.CATALYSTACTIVITY));
 
         assertEquals(1, iReactions.get("R-HSA-71118").getProteoformParticipants().size());
         assertTrue(iReactions.get("R-HSA-71118").getProteoformParticipants().containsEntry(ProteoformFormat.SIMPLE.getProteoform("P00439"), Role.CATALYSTACTIVITY));
@@ -95,11 +97,11 @@ class ExtractorTest {
         ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
         ImmutableMap<String, Reaction> iReactions = Extractor.getReactions();
 
-        assertEquals(8, iReactions.get("R-HSA-419083").getProteinParticipants().keySet().size());
-        assertTrue(iReactions.get("R-HSA-419083").getProteinParticipants().containsEntry("O14974", Role.INPUT));
-        assertTrue(iReactions.get("R-HSA-419083").getProteinParticipants().containsEntry("O14974", Role.OUTPUT));
-        assertTrue(iReactions.get("R-HSA-419083").getProteinParticipants().containsEntry("O75116", Role.CATALYSTACTIVITY));
-        assertTrue(iReactions.get("R-HSA-419083").getProteinParticipants().containsEntry("P62140", Role.OUTPUT));
+        assertEquals(8, iReactions.get("R-HSA-419083").getProteinParticipantsWithRole().keySet().size());
+        assertTrue(iReactions.get("R-HSA-419083").getProteinParticipantsWithRole().containsEntry("O14974", Role.INPUT));
+        assertTrue(iReactions.get("R-HSA-419083").getProteinParticipantsWithRole().containsEntry("O14974", Role.OUTPUT));
+        assertTrue(iReactions.get("R-HSA-419083").getProteinParticipantsWithRole().containsEntry("O75116", Role.CATALYSTACTIVITY));
+        assertTrue(iReactions.get("R-HSA-419083").getProteinParticipantsWithRole().containsEntry("P62140", Role.OUTPUT));
 
         assertEquals(9, iReactions.get("R-HSA-419083").getProteoformParticipants().keySet().size());
         assertEquals(11, iReactions.get("R-HSA-419083").getProteoformParticipants().size());
@@ -115,11 +117,11 @@ class ExtractorTest {
         ImmutableMap<String, Reaction> iReactions = Extractor.getReactions();
 
         String reaction = "R-HSA-6802927";
-        assertEquals(30, iReactions.get(reaction).getProteinParticipants().keySet().size());
-        assertTrue(iReactions.get(reaction).getProteinParticipants().containsEntry("O00203", Role.INPUT));
-        assertTrue(iReactions.get(reaction).getProteinParticipants().containsEntry("O15164", Role.OUTPUT));
-        assertTrue(iReactions.get(reaction).getProteinParticipants().containsEntry("O60674", Role.CATALYSTACTIVITY));
-        assertFalse(iReactions.get(reaction).getProteinParticipants().containsEntry("Q96PU8", Role.CATALYSTACTIVITY));
+        assertEquals(30, iReactions.get(reaction).getProteinParticipantsWithRole().keySet().size());
+        assertTrue(iReactions.get(reaction).getProteinParticipantsWithRole().containsEntry("O00203", Role.INPUT));
+        assertTrue(iReactions.get(reaction).getProteinParticipantsWithRole().containsEntry("O15164", Role.OUTPUT));
+        assertTrue(iReactions.get(reaction).getProteinParticipantsWithRole().containsEntry("O60674", Role.CATALYSTACTIVITY));
+        assertFalse(iReactions.get(reaction).getProteinParticipantsWithRole().containsEntry("Q96PU8", Role.CATALYSTACTIVITY));
 
         assertEquals(54, iReactions.get(reaction).getProteoformParticipants().keySet().size());
         assertEquals(55, iReactions.get(reaction).getProteoformParticipants().size());
@@ -138,11 +140,11 @@ class ExtractorTest {
 
         ImmutableMap<String, Reaction> iReactions = Extractor.getReactions();
 
-        assertEquals(14, iReactions.get("R-HSA-8863895").getProteinParticipants().keySet().size());
-        assertTrue(iReactions.get("R-HSA-8863895").getProteinParticipants().get("O14920").contains(Role.CATALYSTACTIVITY));
-        assertTrue(iReactions.get("R-HSA-8863895").getProteinParticipants().get("O00161").contains(Role.INPUT));
-        assertTrue(iReactions.get("R-HSA-8863895").getProteinParticipants().get("O00161").contains(Role.OUTPUT));
-        assertTrue(iReactions.get("R-HSA-8863895").getProteinParticipants().get("Q99836").contains(Role.REGULATEDBY));
+        assertEquals(14, iReactions.get("R-HSA-8863895").getProteinParticipantsWithRole().keySet().size());
+        assertTrue(iReactions.get("R-HSA-8863895").getProteinParticipantsWithRole().get("O14920").contains(Role.CATALYSTACTIVITY));
+        assertTrue(iReactions.get("R-HSA-8863895").getProteinParticipantsWithRole().get("O00161").contains(Role.INPUT));
+        assertTrue(iReactions.get("R-HSA-8863895").getProteinParticipantsWithRole().get("O00161").contains(Role.OUTPUT));
+        assertTrue(iReactions.get("R-HSA-8863895").getProteinParticipantsWithRole().get("Q99836").contains(Role.REGULATEDBY));
 
     }
 
@@ -439,13 +441,21 @@ class ExtractorTest {
 
         ImmutableSetMultimap<String, String> imapRsidsToProteins = Extractor.getRsIdsToProteins(22);
 
-        assertTrue(imapRsidsToProteins.containsKey("rs35873774"));
-        assertTrue(imapRsidsToProteins.get("rs35873774").contains("P17861"));
+        System.out.println(imapRsidsToProteins.size());
+
+        assertTrue(imapRsidsToProteins.containsKey("rs771638142"));
+        assertTrue(imapRsidsToProteins.get("rs771638142").contains("Q8NG94"));
+
+        assertTrue(imapRsidsToProteins.containsKey("rs9628391"));
+        assertTrue(imapRsidsToProteins.get("rs9628391").contains("Q8NG94"));
 
         ImmutableSetMultimap<Long, String> imapChrBpToProteins = Extractor.getChrBpToProteins(22);
 
-        assertTrue(imapChrBpToProteins.containsKey(29191932L));
-        assertTrue(imapChrBpToProteins.get(29191932L).contains("P17861"));
+        assertTrue(imapChrBpToProteins.containsKey(16444392L));
+        assertTrue(imapChrBpToProteins.get(16444392L).contains("Q8NG94"));
+
+        assertTrue(imapChrBpToProteins.containsKey(16446491L));
+        assertTrue(imapChrBpToProteins.get(16446491L).contains("Q8NG94"));
     }
 
     @Test
