@@ -2,16 +2,16 @@ package no.uib.pap.neo4j;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Multimap;
 import no.uib.pap.extractor.neo4j.ConnectionNeo4j;
 import no.uib.pap.extractor.neo4j.Extractor;
-import no.uib.pap.model.Proteoform;
-import no.uib.pap.model.ProteoformFormat;
-import no.uib.pap.model.Reaction;
-import no.uib.pap.model.Role;
+import no.uib.pap.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
+import java.util.Map;
 
+import static no.uib.pap.extractor.neo4j.Extractor.getSNPAndSwissProtFromVep;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ExtractorTest {
@@ -402,11 +402,24 @@ class ExtractorTest {
     }
 
     @Test
+    void getSNPAndSwissProtFromVep_whenHasAllColumnValues_returnProtein() {
+        Multimap<Snp, String> snpToSwissprotMap = getSNPAndSwissProtFromVep("19 39738787 rs12979860 T ENSG00000197110 Q8IZI9 NA 282617");
+
+        for (Map.Entry<Snp, String> snpToSwissprotPair : snpToSwissprotMap.entries()) {
+            assertEquals("rs12979860", snpToSwissprotPair.getKey().getRsid(), "Missing rsid: ");
+        }
+    }
+
+    @Test
     void imapGeneticVariantsToProteinsTest19() {
         ConnectionNeo4j.initializeNeo4j("bolt://127.0.0.1:7687", "", "");
 
         ImmutableSetMultimap<String, String> imapRsidsToProteins = Extractor.getRsIdsToProteins(19);
-
+        for (Map.Entry<String, String> entry : imapRsidsToProteins.entries()) {
+            System.out.println(entry.getKey());
+            if (entry.getKey().equals("rs12979860"))
+                break;
+        }
         assertTrue(imapRsidsToProteins.containsKey("rs12979860"));
         assertTrue(imapRsidsToProteins.containsKey("rs12980275"));
         assertTrue(imapRsidsToProteins.get("rs12979860").contains("Q8IZI9"));

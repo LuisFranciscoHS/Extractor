@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.uib.pap.extractor.PSIMOD;
+package no.uib.pap.extractor.psimod;
 
 import org.apache.commons.cli.*;
 import org.neo4j.driver.v1.AuthTokens;
@@ -24,10 +24,14 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ *  Support class to run {@link no.uib.pap.extractor.psimod.OnthologyHttpClient} with command line arguments.
+ *
+ *  This class is not used needed for PathwayMatcher functionality, but serves as a support tool to consult the
+ *  available standard modification types.
  *
  * @author Luis Francisco Hernández Sánchez
  */
-public class MODGet {
+public class ExtractorPsiMod {
 
     public static void main(String args[]) {
         // Define and parse command line options
@@ -119,7 +123,7 @@ public class MODGet {
             resultFW.close();
         } catch (IOException ex) {
             System.out.println("Could not create the output file in the specified path.");
-            //Logger.getLogger(MODGet.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(ExtractorPsiMod.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.uib.pap.extractor.PSIMOD;
+package no.uib.pap.extractor.psimod;
 
 import java.io.BufferedReader;
 import java.io.FileWriter;
@@ -29,6 +29,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.*;
 
 /**
+ *  Application to get the PSIMOD modifications list and create the tree heirarchy.
+ *
+ *  This class is not used active part of PathwayMatcher, but serves as a support tool to consult the
+ *  available standard modification types. This helped the decision process when developing PathwayMatcher.
  *
  * @author Luis Francisco Hernández Sánchez
  */
@@ -72,7 +76,6 @@ public class OnthologyHttpClient {
 
             e.printStackTrace();
         }
-
     }
 
     /*

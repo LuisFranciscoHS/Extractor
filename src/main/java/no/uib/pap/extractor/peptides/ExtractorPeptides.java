@@ -13,9 +13,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
- * @author Luis Francisco Hernández Sánchez <luis.sanchez@uib.no>
+ *  This class gathers the 'Proteotypic Peptide' set from ProteomeTools in a single list file.
  *
- *  This class takes all the zip files corresponding to the "TUM_first_pool" of ProteomeTools and gathers the content of the
+ *  It takes all the zip files corresponding to the "TUM_first_pool" of ProteomeTools and gathers the content of the
  *  each zip file contains a peptide list in a file called "peptides.txt". The program then gathers all the peptides from each peptide file.
  *  The result is an output file with a single column called PTPs_ProteomeTools.csv, with one peptide each line.
  *
@@ -24,6 +24,8 @@ import java.util.zip.ZipFile;
  *
  *  Note: Before running this class you have to adjust the paths indicating the location of the downloaded repository
  *  files and where to store the resulting file.
+ *
+ *  @author Luis Francisco Hernández Sánchez <luis.sanchez@uib.no>
  */
 
 public class ExtractorPeptides {

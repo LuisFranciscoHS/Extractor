@@ -65,8 +65,6 @@ class SetNeo4jConf {
             }
             String inputStr = inputBuffer.toString();
 
-            LineIterator.closeQuietly(it);
-
             // Second: Write all lines to the new file
             FileOutputStream fileOut = new FileOutputStream(fileName);
             fileOut.write(inputStr.getBytes());
@@ -96,8 +94,6 @@ class SetNeo4jConf {
                 inputBuffer.append('\n');
             }
             String inputStr = inputBuffer.toString();
-
-            LineIterator.closeQuietly(it);
 
             // Second: Write all lines to the new file
             FileOutputStream fileOut = new FileOutputStream(fileName);

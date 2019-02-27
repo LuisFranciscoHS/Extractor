@@ -16,11 +16,14 @@ import java.util.zip.GZIPOutputStream;
 import static no.uib.pap.model.Error.ERROR_READING_VEP_TABLES;
 import static no.uib.pap.model.Error.sendError;
 
+/**
+ * This module gathers reference biological data necessary to perform pathway search and analysis,
+ * and creates static mapping files that are loaded during execution of PathwayMatcher.
+ */
 public class Extractor {
 
-    // Separate sets of objects are created to have more than one attribute of the
-    // objects like, reactions or pathways
-    // Other objects like genes, proteins don't need a separate list, because the
+    // Specific classes are defined for proteoforms, reactions and pathways to have more than one attribute.
+    // Objects like genes, sets, complexes and proteins don't need a separate class, because the
     // identifier is the only attribute used.
 
     private static ImmutableMap<String, Reaction> reactions; // Reaction stId to Reaction displayName
@@ -115,10 +118,6 @@ public class Extractor {
 
         proteinsToProteoforms = getProteinsToProteoforms();
         System.out.println("Finished map proteins to proteoforms.");
-
-        for(Proteoform proteoform : proteoformsToReactions.keySet()){
-            System.out.println(proteoform.toString(ProteoformFormat.SIMPLE));
-        }
     }
 
     private static void getComplexComponents() {
@@ -403,7 +402,7 @@ public class Extractor {
             getPhysicalEntitiesToProteoforms();
         }
 
-        ImmutableMap.Builder<String, Reaction> builderReactions = ImmutableMap.<String, Reaction>builder();
+        ImmutableMap.Builder<String, Reaction> builderReactions = ImmutableMap.builder();
 
         // Fill the reactions stId and displayName
         List<Record> resultList = ConnectionNeo4j.query(ReactomeQueries.GET_ALL_REACTIONS);
@@ -437,7 +436,7 @@ public class Extractor {
      */
     public static ImmutableMap<String, Pathway> getPathways() {
 
-        ImmutableMap.Builder<String, Pathway> builderPathways = ImmutableMap.<String, Pathway>builder();
+        ImmutableMap.Builder<String, Pathway> builderPathways = ImmutableMap.builder();
 
         // Query the database and fill the data structure
         List<Record> resultList = ConnectionNeo4j.query(ReactomeQueries.GET_ALL_PATHWAYS);
@@ -461,8 +460,7 @@ public class Extractor {
     public static ImmutableSetMultimap<String, String> getGenesToProteinsReactome() {
 
         // Query the database and fill the data structure
-        ImmutableSetMultimap.Builder<String, String> builderGenesToProteins = ImmutableSetMultimap
-                .<String, String>builder();
+        ImmutableSetMultimap.Builder<String, String> builderGenesToProteins = ImmutableSetMultimap.builder();
         List<Record> resultList = ConnectionNeo4j.query(ReactomeQueries.GET_MAP_GENES_TO_PROTEINS);
         for (Record record : resultList) {
             builderGenesToProteins.put(record.get("gene").asString(), record.get("protein").asString());
@@ -645,7 +643,7 @@ public class Extractor {
         return pathwaysToTopLevelPathways;
     }
 
-    static Multimap<Snp, String> getSNPAndSwissProtFromVep(String line) {
+    public static Multimap<Snp, String> getSNPAndSwissProtFromVep(String line) {
         ImmutableSetMultimap.Builder<Snp, String> builder = ImmutableSetMultimap.<Snp, String>builder();
         String[] fields = line.split(" ");
         Integer chr = Integer.valueOf(fields[0]);
